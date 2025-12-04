@@ -7,4 +7,44 @@
 .main-content {
   flex: 1;
   /* padding: 2rem; */
+  position: relative;
+  z-index: 1; /* Ensure content sits above blobs */
+  overflow: hidden; /* Prevent blobs from bleeding into header */
+}
+
+/* Global Background Blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  z-index: 0; /* Behind content */
+  pointer-events: none; /* Allow clicking through blobs */
+}
+
+.blob-purple {
+  top: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background-color: var(--color-purple-400);
+  opacity: 0.3;
+}
+
+.blob-indigo {
+  top: 30%;
+  right: -150px;
+  width: 600px;
+  height: 600px;
+  background-color: var(--color-indigo-500);
+  opacity: 0.15;
+}
+
+.blob-blue {
+  bottom: -100px;
+  left: 10%;
+  width: 400px;
+  height: 400px;
+  background-color: #3b82f6;
+  opacity: 0.2;
 }

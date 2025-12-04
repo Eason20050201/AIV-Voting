@@ -1,0 +1,27 @@
+.ui-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: linear-gradient(to right, var(--color-indigo-500), var(--color-purple-400));
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  font-size: 1rem;
+}
+
+.ui-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.ui-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-text-dim);
+  transform: none;
+}
+
+.ui-button.full-width {
+  width: 100%;
+}

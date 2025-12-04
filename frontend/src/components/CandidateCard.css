@@ -1,0 +1,68 @@
+.candidate-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.candidate-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-indigo-400);
+}
+
+.candidate-card.selected {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: var(--color-indigo-500);
+  box-shadow: 0 0 0 1px var(--color-indigo-500);
+}
+
+.radio-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-text-dim);
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.candidate-card.selected .radio-circle {
+  border-color: var(--color-indigo-500);
+}
+
+.candidate-card.selected .radio-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-indigo-500);
+  border-radius: 50%;
+}
+
+.candidate-info h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: var(--color-text-main);
+}
+
+.candidate-role {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--color-indigo-400);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.candidate-info p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}

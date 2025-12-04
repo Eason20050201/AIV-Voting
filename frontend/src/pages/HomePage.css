@@ -6,41 +6,7 @@
   padding: 1rem;
 }
 
-/* Background Blobs */
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  z-index: 0; /* Behind content */
-}
-
-.blob-purple {
-  top: -100px;
-  left: -100px;
-  width: 500px;
-  height: 500px;
-  background-color: var(--color-purple-400);
-  opacity: 0.3;
-}
-
-.blob-indigo {
-  top: 30%;
-  right: -150px;
-  width: 600px;
-  height: 600px;
-  background-color: var(--color-indigo-500);
-  opacity: 0.15;
-}
-
-.blob-blue {
-  bottom: -100px;
-  left: 10%;
-  width: 400px;
-  height: 400px;
-  background-color: #3b82f6;
-  opacity: 0.2;
-}
+/* Background Blobs moved to MainLayout.css */
 
 .content-wrapper {
   position: relative;
@@ -95,4 +61,60 @@
 .folder-structure strong {
   color: var(--color-indigo-400);
   font-weight: 600;
+}
+
+/* Events Section */
+.events-section {
+  margin-top: 4rem;
+  text-align: left;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  color: var(--color-text-main);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sort-label {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.sort-select {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--color-text-main);
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sort-select:hover {
+  border-color: var(--color-indigo-400);
+}
+
+.sort-select option {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
