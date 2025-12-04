@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createEvent } from '../services/mockVotingService';
 import { useAuth } from '../context/AuthContext';
 import './CreateVotingPage.css';
+import Button from '../components/ui/Button';
 
 const CreateVotingPage = () => {
   const navigate = useNavigate();
@@ -170,18 +171,32 @@ const CreateVotingPage = () => {
               ))}
             </div>
             
-            <button type="button" onClick={addCandidate} className="add-candidate-btn">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              fullWidth 
+              onClick={addCandidate}
+              className="add-candidate-btn"
+            >
               + Add Another Candidate
-            </button>
+            </Button>
           </div>
 
           <div className="form-actions">
-            <button type="button" onClick={() => navigate('/')} className="cancel-btn">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => navigate('/')}
+            >
               Cancel
-            </button>
-            <button type="submit" className="submit-btn" disabled={loading}>
+            </Button>
+            <Button 
+              type="submit" 
+              variant="primary" 
+              disabled={loading}
+            >
               {loading ? 'Creating...' : 'Create Voting'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -51,15 +51,15 @@ const UserMenu = () => {
             <span className="dropdown-user-email">{user.email}</span>
           </div>
           
-          <button className="dropdown-item" onClick={() => setIsOpen(false)}>
+          <Link to="/profile" className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>👤</span> Profile
-          </button>
+          </Link>
           <Link to="/my-votings" className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>🗳️</span> My Votings
           </Link>
-          <button className="dropdown-item" onClick={() => setIsOpen(false)}>
+          <Link to="/settings" className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>⚙️</span> Settings
-          </button>
+          </Link>
           
           <div className="dropdown-divider"></div>
           

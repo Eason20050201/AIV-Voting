@@ -7,12 +7,14 @@ const Button = ({
   disabled = false, 
   fullWidth = false, 
   type = 'button',
+  variant = 'primary', // primary, secondary, danger, ghost
+  size = 'md', // sm, md, lg
   className = ''
 }) => {
   return (
     <button 
       type={type}
-      className={`ui-button ${fullWidth ? 'full-width' : ''} ${className}`}
+      className={`btn btn-${variant} btn-${size} ${fullWidth ? 'btn-full' : ''} ${className}`}
       onClick={onClick}
       disabled={disabled}
     >

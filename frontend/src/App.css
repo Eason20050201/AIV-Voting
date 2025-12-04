@@ -17,6 +17,11 @@
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 16px;
+
+  /* Semantic Colors */
+  --primary-color: var(--color-indigo-500);
+  --secondary-color: var(--color-purple-400);
+  --text-secondary: var(--color-text-muted);
 }
 
 body {
