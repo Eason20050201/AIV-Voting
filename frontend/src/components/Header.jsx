@@ -5,15 +5,17 @@ import './Header.css';
 
 const Header = () => {
   return (
-    <header className="header">
-      <div className="logo">
-        <Link to="/">
-          <img src={logo} alt="AIV Voting Logo"/>
+    <header className="header glass-panel">
+      <div className="logo-container">
+        <Link to="/" className="logo-link">
+          <img src={logo} alt="AIV Voting Logo" className="logo-img"/>
+          <span className="site-title gradient-text">AI Voting</span>
         </Link>
       </div>
+
       <nav className="nav">
-        <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/about" className="nav-link">About</Link>
       </nav>
     </header>
   );

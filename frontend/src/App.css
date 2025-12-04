@@ -1,5 +1,49 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Colors from Tailwind Slate */
+  --color-bg: #020617; /* slate-950 */
+  --color-text-main: #e2e8f0; /* slate-200 */
+  --color-text-muted: #94a3b8; /* slate-400 */
+  --color-text-dim: #64748b; /* slate-500 */
+  
+  /* Brand Colors */
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-purple-400: #c084fc;
+  --color-fuchsia-500: #d946ef;
+  
+  /* Glass Effect */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Utility Classes */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.gradient-text {
+  background: linear-gradient(to right, var(--color-indigo-400), var(--color-purple-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }

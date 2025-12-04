@@ -1,6 +1,98 @@
-.folder-structure {
-  margin-top: 2rem;
+.home-container {
+  position: relative;
+  min-height: 80vh;
+  /* overflow: hidden; Removed to allow blobs to bleed if needed, or keep if it causes scrollbars */
+  overflow: hidden; 
   padding: 1rem;
-  border: 1px solid #eee;
-  border-radius: 8px;
+}
+
+/* Background Blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  z-index: 0; /* Behind content */
+}
+
+.blob-purple {
+  top: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background-color: var(--color-purple-400);
+  opacity: 0.3;
+}
+
+.blob-indigo {
+  top: 30%;
+  right: -150px;
+  width: 600px;
+  height: 600px;
+  background-color: var(--color-indigo-500);
+  opacity: 0.15;
+}
+
+.blob-blue {
+  bottom: -100px;
+  left: 10%;
+  width: 400px;
+  height: 400px;
+  background-color: #3b82f6;
+  opacity: 0.2;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.home-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+.home-subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4rem;
+  font-weight: 300;
+}
+
+.folder-structure {
+  text-align: left;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.folder-structure h3 {
+  margin-top: 0;
+  color: var(--color-text-main);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.folder-structure ul {
+  padding-left: 1.5rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.folder-structure li {
+  margin-bottom: 0.75rem;
+}
+
+.folder-structure strong {
+  color: var(--color-indigo-400);
+  font-weight: 600;
 }
