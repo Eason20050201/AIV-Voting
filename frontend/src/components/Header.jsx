@@ -20,6 +20,7 @@ const Header = () => {
       <nav className="nav">
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/about" className="nav-link">About</Link>
+        <Link to="/create-voting" className="nav-link create-btn">Create Voting</Link>
         
         {user ? (
           <UserMenu />

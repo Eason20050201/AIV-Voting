@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './UserMenu.css';
 
@@ -53,6 +54,9 @@ const UserMenu = () => {
           <button className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>👤</span> Profile
           </button>
+          <Link to="/my-votings" className="dropdown-item" onClick={() => setIsOpen(false)}>
+            <span>🗳️</span> My Votings
+          </Link>
           <button className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>⚙️</span> Settings
           </button>

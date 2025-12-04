@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getEventById } from '../data/mockData';
+import { getEventById } from '../services/mockVotingService';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import CandidateCard from '../components/CandidateCard';

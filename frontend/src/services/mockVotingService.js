@@ -1,4 +1,5 @@
-export const mockEvents = [
+// Simulate a database
+let events = [
   {
     id: 1,
     title: "Annual Tech Conference 2025",
@@ -7,6 +8,7 @@ export const mockEvents = [
     votes: 1250,
     endDate: "2025-12-10",
     color: "from-indigo-500 to-purple-500",
+    creatorId: "admin", // Sample creator
     candidates: [
       { id: 'c1', name: "Alice Chen", role: "AI Researcher", description: "Speaking on: The Future of LLMs" },
       { id: 'c2', name: "Bob Smith", role: "Cloud Architect", description: "Speaking on: Serverless at Scale" },
@@ -21,6 +23,7 @@ export const mockEvents = [
     votes: 85,
     endDate: "2025-12-05",
     color: "from-fuchsia-500 to-pink-500",
+    creatorId: "admin",
     candidates: [
       { id: 'e1', name: "David Miller", role: "Frontend Dev", description: "Led the dashboard redesign." },
       { id: 'e2', name: "Eva Zhang", role: "Product Manager", description: "Successfully launched 3 features." }
@@ -34,6 +37,7 @@ export const mockEvents = [
     votes: 42,
     endDate: "2025-12-07",
     color: "from-blue-500 to-cyan-500",
+    creatorId: "user1",
     candidates: [
       { id: 'f1', name: "Pizza Party", role: "Italian", description: "Assorted pizzas and salads." },
       { id: 'f2', name: "Taco Tuesday", role: "Mexican", description: "Build your own tacos." },
@@ -42,20 +46,53 @@ export const mockEvents = [
   }
 ];
 
-// Simulate API calls
+const COLORS = [
+  "from-indigo-500 to-purple-500",
+  "from-fuchsia-500 to-pink-500",
+  "from-blue-500 to-cyan-500",
+  "from-emerald-500 to-teal-500",
+  "from-orange-500 to-red-500",
+  "from-violet-500 to-fuchsia-500"
+];
+
 export const getEvents = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(mockEvents);
-    }, 500); // Simulate network delay
+      resolve([...events]);
+    }, 500);
   });
 };
 
 export const getEventById = (id) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const event = mockEvents.find(e => e.id === parseInt(id));
+      const event = events.find(e => e.id === parseInt(id));
       resolve(event);
+    }, 500);
+  });
+};
+
+export const createEvent = (eventData) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newEvent = {
+        ...eventData,
+        id: Date.now(), // Simple ID generation
+        votes: 0,
+        status: "Active",
+        color: COLORS[Math.floor(Math.random() * COLORS.length)]
+      };
+      events = [newEvent, ...events];
+      resolve(newEvent);
+    }, 800);
+  });
+};
+
+export const getEventsByCreator = (userId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const userEvents = events.filter(e => e.creatorId === userId);
+      resolve(userEvents);
     }, 500);
   });
 };

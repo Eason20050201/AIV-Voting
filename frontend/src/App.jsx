@@ -5,6 +5,8 @@ import VotingPage from './pages/VotingPage';
 import AboutPage from './pages/AboutPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import CreateVotingPage from './pages/CreateVotingPage';
+import MyVotingsPage from './pages/MyVotingsPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
@@ -27,6 +29,22 @@ function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="signup" element={<SignupPage />} />
+            <Route 
+              path="create-voting" 
+              element={
+                <ProtectedRoute>
+                  <CreateVotingPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-votings" 
+              element={
+                <ProtectedRoute>
+                  <MyVotingsPage />
+                </ProtectedRoute>
+              } 
+            />
           </Route>
         </Routes>
       </AuthProvider>
