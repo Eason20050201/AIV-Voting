@@ -69,7 +69,7 @@
 
 **關鍵缺失項目 (Critical Missing Elements):**
 
-- **頁面標題 (Page Title)：** `index.html` 目前是 `<title>aiv-voting</title>`。應該更具描述性，例如 "VoteFlow - Secure AI Voting Platform"。
+- **頁面標題 (Page Title)：** `index.html` 目前是 `<title>aiv-voting</title>`。應該更具描述性，例如 "AIVoting - Secure AI Voting Platform"。
 - **Meta Description (描述標籤)：** 缺失。搜尋引擎需要此標籤來顯示網站摘要。
 - **Open Graph (OG) Tags：** 缺失。當分享到社群媒體（Facebook, Twitter, LinkedIn）時，連結會看起來損壞或顯示空白。
 - **動態 SEO：** 當訪問特定的投票頁面（例如「年度董事會選舉」）時，瀏覽器分頁標題仍然顯示 "aiv-voting"。

@@ -44,7 +44,7 @@ const HomePage = () => {
     <div className="home-container">
       <div className="content-wrapper">
         <h1 className="home-title">
-          Welcome to <span className="gradient-text">VoteFlow</span>
+          Welcome to <span className="gradient-text">AIVoting</span>
         </h1>
         <p className="home-subtitle">
           Secure, transparent, and efficient voting for your organization.

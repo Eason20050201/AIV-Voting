@@ -1,5 +1,5 @@
 {
-  "name": "VoteFlow Portal",
+  "name": "AIVoting Portal",
   "description": "A modern, dual-identity authentication portal for a voting application. Users can choose to enter as a Voter or an Organizer with distinct visual experiences.",
   "requestFramePermissions": []
 }

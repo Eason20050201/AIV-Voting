@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/LOGO.JPG';
+import logo from '../assets/LOGO-name.svg';
 import { useAuth } from '../context/AuthContext';
 import UserMenu from './UserMenu';
 import './Header.css';
@@ -13,7 +13,7 @@ const Header = () => {
       <div className="logo-container">
         <Link to="/" className="logo-link">
           <img src={logo} alt="AIV Voting Logo" className="logo-img"/>
-          <span className="site-title gradient-text">AI Voting</span>
+          {/* <span className="site-title gradient-text">AI Voting</span> */}
         </Link>
       </div>
 
