@@ -9,7 +9,8 @@ let users = [
     name: 'Demo User',
     email: 'demo@example.com',
     password: 'password123', // In a real app, this would be hashed
-    role: 'voter'
+    role: 'voter',
+    kycStatus: 'unverified' // 'unverified', 'pending', 'verified'
   }
 ];
 
@@ -28,6 +29,28 @@ export const mockAuthService = {
           });
         } else {
           reject(new Error('Invalid email or password'));
+        }
+      }, MOCK_DELAY);
+    });
+  },
+
+  submitVerification: async (userId, verificationData) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const userIndex = users.findIndex(u => u.id === userId);
+        
+        if (userIndex !== -1) {
+          // Update user status
+          users[userIndex].kycStatus = 'verified'; // Auto-verify for demo
+          
+          // Return updated user
+          const { password, ...userWithoutPassword } = users[userIndex];
+          resolve({
+            success: true,
+            user: userWithoutPassword
+          });
+        } else {
+          reject(new Error('User not found'));
         }
       }, MOCK_DELAY);
     });

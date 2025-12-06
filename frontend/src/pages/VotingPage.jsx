@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getEventById } from '../services/mockVotingService';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import CandidateCard from '../components/CandidateCard';
 import './VotingPage.css';
 
+import { useAuth } from '../context/AuthContext';
+
 const VotingPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  // const [showVerification, setShowVerification] = useState(false); // Removed state
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -26,6 +31,26 @@ const VotingPage = () => {
 
     fetchEvent();
   }, [id]);
+
+  const handleVoteClick = () => {
+    if (!user) {
+      alert("Please login to vote");
+      return;
+    }
+
+    if (user.kycStatus !== 'verified') {
+      // Redirect to verification page with return path
+      navigate(`/verify?redirect=/vote/${id}`);
+      return;
+    }
+
+    submitVote();
+  };
+
+  const submitVote = () => {
+    alert(`Voted for candidate ${selectedCandidate}`);
+    // Here we would call the actual vote API
+  };
 
   if (loading) return <div className="loading-container">Loading voting details...</div>;
   if (!event) return <div className="error-container">Event not found. <Link to="/">Go Home</Link></div>;
@@ -64,7 +89,7 @@ const VotingPage = () => {
 
         <div className="voting-actions">
           <Button 
-            onClick={() => alert(`Voted for candidate ${selectedCandidate}`)}
+            onClick={handleVoteClick}
             disabled={!selectedCandidate}
           >
             Submit Vote

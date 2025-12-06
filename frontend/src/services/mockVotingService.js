@@ -7,7 +7,6 @@ let events = [
     status: "Active",
     votes: 1250,
     endDate: "2025-12-10",
-    color: "from-indigo-500 to-purple-500",
     creatorId: "admin", // Sample creator
     candidates: [
       { id: 'c1', name: "Alice Chen", role: "AI Researcher", description: "Speaking on: The Future of LLMs" },
@@ -22,7 +21,6 @@ let events = [
     status: "Ending Soon",
     votes: 85,
     endDate: "2025-12-05",
-    color: "from-fuchsia-500 to-pink-500",
     creatorId: "admin",
     candidates: [
       { id: 'e1', name: "David Miller", role: "Frontend Dev", description: "Led the dashboard redesign." },
@@ -36,7 +34,6 @@ let events = [
     status: "Active",
     votes: 42,
     endDate: "2025-12-07",
-    color: "from-blue-500 to-cyan-500",
     creatorId: "user1",
     candidates: [
       { id: 'f1', name: "Pizza Party", role: "Italian", description: "Assorted pizzas and salads." },
@@ -44,15 +41,6 @@ let events = [
       { id: 'f3', name: "Sushi Platter", role: "Japanese", description: "Fresh sushi and rolls." }
     ]
   }
-];
-
-const COLORS = [
-  "from-indigo-500 to-purple-500",
-  "from-fuchsia-500 to-pink-500",
-  "from-blue-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-  "from-orange-500 to-red-500",
-  "from-violet-500 to-fuchsia-500"
 ];
 
 export const getEvents = () => {
@@ -79,8 +67,7 @@ export const createEvent = (eventData) => {
         ...eventData,
         id: Date.now(), // Simple ID generation
         votes: 0,
-        status: "Active",
-        color: COLORS[Math.floor(Math.random() * COLORS.length)]
+        status: "Active"
       };
       events = [newEvent, ...events];
       resolve(newEvent);

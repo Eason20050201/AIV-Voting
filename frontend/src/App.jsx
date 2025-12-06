@@ -9,6 +9,7 @@ import CreateVotingPage from './pages/CreateVotingPage';
 import MyVotingsPage from './pages/MyVotingsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import VerificationPage from './pages/VerificationPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
@@ -52,6 +53,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="verify" 
+              element={
+                <ProtectedRoute>
+                  <VerificationPage />
                 </ProtectedRoute>
               } 
             />
