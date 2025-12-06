@@ -7,7 +7,7 @@ const AboutPage = () => {
       <div className="about-content">
         <div className="about-header">
           <h1 className="about-title">
-            About <span className="gradient-text">AIVoting</span>
+            About <span className="gradient-text">VoteFlow</span>
           </h1>
           <p className="about-subtitle">
             Empowering organizations with secure, transparent, and efficient decision-making tools for the modern age.
@@ -17,7 +17,7 @@ const AboutPage = () => {
         <section className="about-section glass-panel">
           <h2 className="section-title">🚀 Our Mission</h2>
           <p className="section-text">
-            At AIVoting, we believe that every voice matters. Our mission is to democratize decision-making processes by providing a platform that is accessible, reliable, and secure. Whether it's a small team decision or a large-scale organizational vote, AIVoting ensures that the process is smooth and the results are trustworthy.
+            At VoteFlow, we believe that every voice matters. Our mission is to democratize decision-making processes by providing a platform that is accessible, reliable, and secure. Whether it's a small team decision or a large-scale organizational vote, VoteFlow ensures that the process is smooth and the results are trustworthy.
           </p>
         </section>
 
@@ -51,7 +51,7 @@ const AboutPage = () => {
         <section className="about-section glass-panel">
           <h2 className="section-title">🤝 Join the Revolution</h2>
           <p className="section-text">
-            Ready to transform how your organization makes decisions? Join thousands of teams who trust AIVoting for their governance needs. Let's build a more democratic future together.
+            Ready to transform how your organization makes decisions? Join thousands of teams who trust VoteFlow for their governance needs. Let's build a more democratic future together.
           </p>
         </section>
       </div>
