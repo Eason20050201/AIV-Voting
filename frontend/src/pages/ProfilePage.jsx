@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
 import Button from '../components/ui/Button';
+import WalletConnect from '../components/WalletConnect';
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -50,6 +51,13 @@ const ProfilePage = () => {
           </div>
         </div>
         <Button variant="secondary" className="edit-profile-btn">Edit Profile</Button>
+      </div>
+
+      <div className="profile-section">
+        <h2>Wallet Connection</h2>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+          <WalletConnect />
+        </div>
       </div>
 
       <div className="profile-section">

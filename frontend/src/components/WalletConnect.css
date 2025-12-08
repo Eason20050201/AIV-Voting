@@ -1,0 +1,73 @@
+.wallet-connect-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.wallet-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.custom-ui-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.address-box {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: monospace;
+  word-break: break-all;
+  border: 1px solid rgba(132, 204, 255, 0.3); /* Subtle blue border */
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15); /* Soft glow */
+  transition: all 0.3s ease;
+}
+
+.address-box:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.custom-disconnect-btn {
+  padding: 10px 20px;
+  background: rgba(255, 77, 77, 0.8);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.custom-disconnect-btn:hover {
+  background: #ff4d4d;
+  transform: translateY(-1px);
+}
+
+.custom-connect-btn {
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.custom-connect-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
+}
+
+.custom-connect-btn:active {
+  transform: translateY(1px);
+}

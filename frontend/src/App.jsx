@@ -10,14 +10,16 @@ import MyVotingsPage from './pages/MyVotingsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import VerificationPage from './pages/VerificationPage';
+import { IotaProvider } from './context/IotaProvider';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <IotaProvider>
+      <BrowserRouter>
+        <AuthProvider>
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
@@ -75,7 +77,8 @@ function App() {
           </Route>
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </IotaProvider>
   );
 }
 
