@@ -7,12 +7,12 @@ import './MainLayout.css';
 const MainLayout = () => {
   return (
     <div className="main-layout">
-      <Header />
-      <main className="main-content">
-        {/* Global Background Blobs */}
+      {/* Global Background Blobs */}
         <div className="blob blob-purple"></div>
         <div className="blob blob-indigo"></div>
         <div className="blob blob-blue"></div>
+      <Header />
+      <main className="main-content">
         
         <Outlet />
       </main>

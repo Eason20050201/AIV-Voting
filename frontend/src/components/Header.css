@@ -23,7 +23,8 @@
 }
 
 .logo-img {
-  height: 45px;
+  height: 55px;
+  padding-top: 2px;
   /* width: auto; */
   /* border-radius: 6px; */
 }
