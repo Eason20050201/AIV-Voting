@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { mockAuthService } from '../services/mockAuthService';
+import { authService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 
 export const useVerification = () => {
@@ -26,7 +26,7 @@ export const useVerification = () => {
         // In real app we would upload file here.
       };
 
-      const response = await mockAuthService.submitVerification(user.id, verificationData);
+      const response = await authService.submitVerification(user.id, verificationData);
       
       if (response.success) {
         // Update the user in AuthContext to reflect the new status

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
-import './AuthPage.css';
+import './SignupPage.css'; // Updated CSS Import
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'voter' // Default role
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,9 +36,9 @@ const SignupPage = () => {
 
     try {
       const result = await signup({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
+        username: formData.username,
+        password: formData.password,
+        role: formData.role
       });
 
       if (result.success) {
@@ -54,37 +54,37 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card glass-panel">
-        <h2 className="auth-title">Create Account</h2>
+    <div className="signup-container">
+      <div className="signup-card glass-panel">
+        <h2 className="signup-title">Create Account</h2>
         
         {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="signup-form">
           <div className="form-group">
-            <label className="form-label">Full Name</label>
+            <label className="form-label">Username</label>
             <input
               type="text"
-              name="name"
+              name="username"
               className="form-input"
-              value={formData.name}
+              value={formData.username}
               onChange={handleChange}
               required
-              placeholder="Enter your name"
+              placeholder="Choose a username"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
+            <label className="form-label">I am a...</label>
+            <select
+              name="role"
+              className="form-select"
+              value={formData.role}
               onChange={handleChange}
-              required
-              placeholder="Enter your email"
-            />
+            >
+              <option value="voter">Voter (User)</option>
+              <option value="organizer">Organizer (Admin)</option>
+            </select>
           </div>
 
           <div className="form-group">
@@ -118,7 +118,7 @@ const SignupPage = () => {
           </Button>
         </form>
 
-        <div className="auth-footer">
+        <div className="signup-footer">
           Already have an account? 
           <Link to="/login" className="auth-link">Login</Link>
         </div>

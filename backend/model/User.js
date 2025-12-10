@@ -9,12 +9,7 @@ const userSchema = new mongoose.Schema({
     unique: true, // 帳號不能重複
     trim: true
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
-  },
+
   password: {
     type: String,
     required: true

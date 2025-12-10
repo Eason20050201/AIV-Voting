@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockAuthService } from '../services/mockAuthService';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -18,9 +18,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     try {
-      const data = await mockAuthService.login(email, password);
+      const data = await authService.login(username, password);
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const data = await mockAuthService.signup(userData);
+      const data = await authService.signup(userData);
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await mockAuthService.logout();
+    await authService.logout();
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');

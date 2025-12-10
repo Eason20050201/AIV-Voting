@@ -26,7 +26,7 @@ const UserMenu = () => {
 
   // Generate initials (e.g., "Demo User" -> "DU")
   const getInitials = (name) => {
-    return name
+    return (name || '')
       .split(' ')
       .map(part => part[0])
       .join('')
@@ -41,13 +41,13 @@ const UserMenu = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="User menu"
       >
-        {getInitials(user.name)}
+        {getInitials(user.username)}
       </button>
 
       {isOpen && (
         <div className="user-dropdown glass-panel">
           <div className="dropdown-header">
-            <span className="dropdown-user-name">{user.name}</span>
+            <span className="dropdown-user-name">{user.username}</span>
             <span className="dropdown-user-email">{user.email}</span>
           </div>
           
@@ -55,7 +55,7 @@ const UserMenu = () => {
             <span>👤</span> Profile
           </Link>
           <Link to="/my-votings" className="dropdown-item" onClick={() => setIsOpen(false)}>
-            <span>🗳️</span> My Votings
+            <span>🗳️</span> {user.role === 'organizer' ? 'My Created Votings' : 'My Voted Activities'}
           </Link>
           <Link to="/settings" className="dropdown-item" onClick={() => setIsOpen(false)}>
             <span>⚙️</span> Settings

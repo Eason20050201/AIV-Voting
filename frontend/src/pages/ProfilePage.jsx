@@ -10,7 +10,7 @@ const ProfilePage = () => {
   if (!user) return null;
 
   const getInitials = (name) => {
-    return name
+    return (name || '')
       .split(' ')
       .map(part => part[0])
       .join('')
@@ -22,10 +22,10 @@ const ProfilePage = () => {
     <div className="profile-page fade-in">
       <div className="profile-header">
         <div className="profile-avatar-large">
-          {getInitials(user.name)}
+          {getInitials(user.username)}
         </div>
         <div className="profile-info">
-          <h1>{user.name}</h1>
+          <h1>{user.username}</h1>
           <div className="profile-email">{user.email}</div>
         </div>
       </div>
@@ -35,7 +35,7 @@ const ProfilePage = () => {
         <div className="info-grid">
           <div className="info-item">
             <label>Full Name</label>
-            <p>{user.name}</p>
+            <p>{user.username}</p>
           </div>
           <div className="info-item">
             <label>Email Address</label>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createEvent } from '../services/mockVotingService';
+import { createEvent } from '../services/votingService';
 import { useAuth } from '../context/AuthContext';
 import './CreateVotingPage.css';
 import Button from '../components/ui/Button';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VotingCard from '../components/VotingCard';
-import { getEvents } from '../services/mockVotingService';
+import { getEvents } from '../services/votingService';
 import './HomePage.css';
 
 const HomePage = () => {

@@ -5,7 +5,7 @@ import Button from '../components/ui/Button';
 import './AuthPage.css';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const result = await login(email, password);
+      const result = await login(username, password);
       if (result.success) {
         navigate(from, { replace: true });
       } else {
@@ -46,14 +46,14 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">Username</label>
             <input
-              type="email"
+              type="text"
               className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder="Enter your username"
             />
           </div>
 
