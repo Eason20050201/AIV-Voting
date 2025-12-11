@@ -23,7 +23,13 @@
 }
 
 .badge-default {
-  background-color: rgba(148, 163, 184, 0.2);
+  background-color: rgba(99, 102, 241, 0.2); /* Indigo tint for Upcoming/Default */
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge-secondary {
+  background-color: rgba(148, 163, 184, 0.15); /* Gray for Ended */
   color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid rgba(148, 163, 184, 0.2);
 }

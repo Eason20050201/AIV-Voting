@@ -1,118 +1,197 @@
+/* ... existing styles ... */
 .create-voting-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1.5rem;
 }
 
 .create-voting-content {
-  padding: 2.5rem;
-  border-radius: 1rem;
+  padding: 3rem;
+  border-radius: 1.5rem;
+  background: var(--surface-glass);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .page-title {
   font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+  font-weight: 800;
+  margin-bottom: 2.5rem;
   text-align: center;
-  color: white;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .voting-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  width: 100%; /* Ensure form group takes full width available */
 }
 
 .form-group label {
-  color: #e2e8f0;
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.95rem;
+  margin-left: 0.25rem;
 }
 
 .form-input,
 .form-textarea {
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
   color: white;
   font-size: 1rem;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  box-sizing: border-box; /* Explicitly set box-sizing */
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
   background: rgba(30, 41, 59, 0.8);
+  transform: translateY(-1px);
 }
 
 .form-textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
+  line-height: 1.6;
 }
 
 .candidates-section {
-  margin-top: 1rem;
-  padding-top: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .section-subtitle {
-  font-size: 1.25rem;
-  color: white;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .candidate-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .candidate-item {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 0.75rem;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: 
+    "name role"
+    "desc desc";
+  gap: 1rem;
   background: rgba(255, 255, 255, 0.03);
-  padding: 1rem;
-  border-radius: 0.5rem;
+  padding: 1.5rem;
+  padding-right: 3.5rem; /* Space for delete button */
+  border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+  position: relative;
 }
+
+.candidate-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* Assign grid areas based on child index */
+.candidate-item .form-group:nth-child(1) { grid-area: name; }
+.candidate-item .form-group:nth-child(2) { grid-area: role; }
 
 .remove-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   background: transparent;
-  border: none;
-  color: #ef4444;
+  border: 1px solid transparent;
+  color: #94a3b8;
   cursor: pointer;
-  padding: 0.5rem;
-  font-size: 1.2rem;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+  padding: 0;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  height: 36px; 
+  width: 36px;
 }
 
+/* Fix alignment if labels are missing in candidate item inputs */
+.candidate-item .form-group input {
+    height: 48px; /* Match button height */
+}
+
+
 .remove-btn:hover {
-  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.add-candidate-btn {
+  margin-top: 1rem;
+  border-style: dashed !important;
+  border-width: 2px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.add-candidate-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
 }
 
 .form-actions {
-  margin-top: 2rem;
+  margin-top: 3rem;
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 @media (max-width: 640px) {
   .candidate-item {
     grid-template-columns: 1fr;
+    grid-template-areas: 
+        "name"
+        "role"
+        "desc";
+    padding-right: 1.5rem; /* Reduce padding on mobile */
+    gap: 0.75rem;
+  }
+  
+  .remove-btn {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .create-voting-content {
+      padding: 1.5rem;
   }
 }

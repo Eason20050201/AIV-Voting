@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { getEventsByCreator } from '../services/votingService';
 import { useAuth } from '../context/AuthContext';
 import VotingCard from '../components/VotingCard';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
 import './MyVotingsPage.css';
 
 const MyCreatedVotingsPage = () => {
@@ -39,7 +41,7 @@ const MyCreatedVotingsPage = () => {
       {events.length === 0 ? (
         <div className="empty-state">
           <p>You haven't created any voting events yet.</p>
-          <Link to="/create-voting" className="create-link-btn">
+          <Link to="/create" className="create-link-btn">
             Create Your First Voting
           </Link>
         </div>
@@ -47,14 +49,23 @@ const MyCreatedVotingsPage = () => {
         <div className="my-votings-grid">
           {events.map((event) => (
             <VotingCard 
-              key={event.id}
-              id={event.id}
-              title={event.title}
-              description={event.description}
-              status={event.status}
-              votes={event.votes}
-              endDate={event.endDate}
-            />
+                key={event._id || event.id}
+                id={event._id || event.id}
+                title={event.title}
+                description={event.description}
+                status={event.status}
+                votes={event.votes} 
+                endDate={event.endDate}
+            >
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <Link to={`/manage-votes/${event._id || event.id}`} style={{ flex: 1 }}>
+                        <Button variant="secondary" size="sm" fullWidth>Manage</Button>
+                    </Link>
+                    <Link to={`/vote/${event._id || event.id}`} style={{ flex: 1 }}>
+                        <Button variant="outline" size="sm" fullWidth>View</Button>
+                    </Link>
+                </div>
+            </VotingCard>
           ))}
         </div>
       )}

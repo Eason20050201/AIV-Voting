@@ -1,74 +1,108 @@
 .voting-page-container {
-  position: relative;
-  min-height: 80vh;
-  padding: 2rem 1rem;
-  overflow: hidden;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .voting-content {
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2.5rem;
-  border-radius: 1.5rem;
-}
-
-.back-link {
-  display: inline-block;
-  margin-bottom: 2rem;
-  color: var(--color-text-muted);
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.back-link:hover {
-  color: var(--color-indigo-400);
+  padding: 2rem;
 }
 
 .voting-header {
-  margin-bottom: 3rem;
-  border-bottom: 1px solid var(--glass-border);
-  padding-bottom: 2rem;
+  margin: 2rem 0;
+  text-align: center;
 }
 
 .voting-title {
   font-size: 2.5rem;
-  font-weight: 700;
   margin: 1rem 0;
-  color: var(--color-text-main);
+  color: var(--text-primary);
 }
 
 .voting-description {
+  color: var(--text-secondary);
   font-size: 1.1rem;
-  color: var(--color-text-muted);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .voting-meta {
+  margin-top: 1.5rem;
   display: flex;
   gap: 2rem;
-  color: var(--color-text-dim);
-  font-size: 0.9rem;
+  justify-content: center;
+  color: var(--text-muted);
 }
 
-/* Candidates Grid */
+.candidates-section {
+  margin-top: 3rem;
+}
+
 .candidates-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
 
-/* Actions */
 .voting-actions {
   margin-top: 3rem;
-  text-align: right;
+  display: flex;
+  justify-content: center;
 }
 
-.loading-container, .error-container {
-  text-align: center;
-  padding: 4rem;
-  color: var(--color-text-muted);
-  font-size: 1.2rem;
+.back-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: var(--surface-glass);
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
 }

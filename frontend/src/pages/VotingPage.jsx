@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getEventById } from '../services/votingService';
+import { getEventById, castVote } from '../services/votingService';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import CandidateCard from '../components/CandidateCard';
@@ -15,7 +15,9 @@ const VotingPage = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  // const [showVerification, setShowVerification] = useState(false); // Removed state
+  const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [identityData, setIdentityData] = useState({ realName: '', idNumber: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -37,19 +39,29 @@ const VotingPage = () => {
       alert("Please login to vote");
       return;
     }
-
-    if (user.kycStatus !== 'verified') {
-      // Redirect to verification page with return path
-      navigate(`/verify?redirect=/vote/${id}`);
-      return;
-    }
-
-    submitVote();
+    // Open modal to get identity data
+    setShowIdentityModal(true);
   };
 
-  const submitVote = () => {
-    alert(`Voted for candidate ${selectedCandidate}`);
-    // Here we would call the actual vote API
+  const handleIdentitySubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+        await castVote({
+            eventId: id,
+            candidateId: selectedCandidate,
+            identityData
+        });
+        alert('Vote submitted successfully! Waiting for organizer verification.');
+        setShowIdentityModal(false);
+        // Refresh event data to show updated counts or status if needed
+        const data = await getEventById(id);
+        setEvent(data);
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        setSubmitting(false);
+    }
   };
 
   if (loading) return <div className="loading-container">Loading voting details...</div>;
@@ -61,13 +73,13 @@ const VotingPage = () => {
         <Link to="/" className="back-link">← Back to Events</Link>
         
         <header className="voting-header">
-          <Badge>{event.status}</Badge>
+          <Badge>{event.status === 'ongoing' ? 'Active' : event.status.charAt(0).toUpperCase() + event.status.slice(1)}</Badge>
 
           <h1 className="voting-title">{event.title}</h1>
           <p className="voting-description">{event.description}</p>
           
           <div className="voting-meta">
-            <span>🗳️ Total Votes: {event.votes}</span>
+            <span>🗳️ Total Verified Votes: {event.votes}</span>
             <span>🕒 Ends: {event.endDate}</span>
           </div>
         </header>
@@ -96,6 +108,43 @@ const VotingPage = () => {
           </Button>
         </div>
       </div>
+
+      {showIdentityModal && (
+          <div className="modal-overlay">
+              <div className="modal-content glass-panel">
+                  <h2>Identity Verification</h2>
+                  <p>The organizer requires identity information to valid your vote.</p>
+                  <form onSubmit={handleIdentitySubmit}>
+                      <div className="form-group">
+                          <label>Real Name</label>
+                          <input 
+                              type="text" 
+                              required 
+                              value={identityData.realName}
+                              onChange={e => setIdentityData({...identityData, realName: e.target.value})}
+                              className="form-input"
+                          />
+                      </div>
+                      <div className="form-group">
+                          <label>ID Number</label>
+                          <input 
+                              type="text" 
+                              required 
+                              value={identityData.idNumber}
+                              onChange={e => setIdentityData({...identityData, idNumber: e.target.value})}
+                              className="form-input"
+                          />
+                      </div>
+                      <div className="modal-actions">
+                          <Button type="button" variant="ghost" onClick={() => setShowIdentityModal(false)}>Cancel</Button>
+                          <Button type="submit" disabled={submitting}>
+                              {submitting ? 'Submitting...' : 'Confirm Vote'}
+                          </Button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      )}
     </div>
   );
 };

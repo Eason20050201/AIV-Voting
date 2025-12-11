@@ -21,7 +21,7 @@ const Header = () => {
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/about" className="nav-link">About</Link>
         {user && user.role === 'organizer' && (
-          <Link to="/create-voting" className="nav-link create-btn">Create Voting</Link>
+          <Link to="/create" className="nav-link create-btn">Create Voting</Link>
         )}
         
         {user ? (

@@ -1,0 +1,137 @@
+.verification-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.verification-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.verification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.verification-card:hover::before {
+  opacity: 1;
+}
+
+.voter-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.voter-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px; /* Soft square instead of circle */
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+.voter-details {
+  flex: 1;
+}
+
+.voter-details h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #fff);
+  font-weight: 600;
+}
+
+.vote-time {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.status-badge {
+  margin-bottom: 0 !important;
+}
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 0.5rem 0; /* Removing background box */
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.identity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.identity-item label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary, #818cf8); /* Use primary color for labels */
+  font-weight: 600;
+}
+
+.identity-value {
+  color: var(--text-primary, #fff);
+  font-family: 'Inter', sans-serif; /* Back to sans-serif for cleaner look */
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.reject-btn {
+  color: #ef4444 !important;
+  border-color: transparent !important;
+}
+
+.reject-btn:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #f87171 !important;
+}
+
+.verify-btn {
+  min-width: 140px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s;
+}
+
+.verify-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+}

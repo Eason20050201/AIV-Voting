@@ -47,8 +47,8 @@ const MyVotedActivitiesPage = () => {
         <div className="my-votings-grid">
           {events.map((event) => (
             <VotingCard 
-              key={event.id}
-              id={event.id}
+              key={event._id || event.id}
+              id={event._id || event.id}
               title={event.title}
               description={event.description}
               status={event.status}
