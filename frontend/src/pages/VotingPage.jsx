@@ -75,7 +75,7 @@ const VotingPage = () => {
       return;
     }
 
-    if (voteStatus) {
+    if (voteStatus && voteStatus !== "rejected") {
       toast.error(`You have already voted. Status: ${voteStatus}`);
       return;
     }
