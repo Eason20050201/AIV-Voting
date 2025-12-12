@@ -8,6 +8,7 @@ const User = require('../model/User');
 // @desc    Register a new user
 // @access  Public
 router.post('/register', async (req, res) => {
+  console.log('Register request body:', req.body);
   const { username, password, role } = req.body;
 
   if (!username || !password) {

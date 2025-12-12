@@ -7,6 +7,6 @@ export default defineConfig({
   base: '/AIV-Voting/', // Added for GitHub Pages deployment
   server: {
     port: 5173,
-    strictPort: false, // Allow fallback if 5173 is taken, but standardizes expectation
+    strictPort: false,
   }
 })

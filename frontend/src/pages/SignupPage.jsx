@@ -71,8 +71,11 @@ const SignupPage = () => {
 
         <form onSubmit={handleSubmit} className="signup-form">
           <div className="form-group">
-            <label className="form-label">Username</label>
+            <label htmlFor="username" className="form-label">
+              Username
+            </label>
             <input
+              id="username"
               type="text"
               name="username"
               className="form-input"
@@ -80,12 +83,16 @@ const SignupPage = () => {
               onChange={handleChange}
               required
               placeholder="Choose a username"
+              autoComplete="username"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">I am a...</label>
+            <label htmlFor="role" className="form-label">
+              I am a...
+            </label>
             <select
+              id="role"
               name="role"
               className="form-select"
               value={formData.role}
@@ -97,8 +104,11 @@ const SignupPage = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               name="password"
               className="form-input"
@@ -106,12 +116,16 @@ const SignupPage = () => {
               onChange={handleChange}
               required
               placeholder="Create a password"
+              autoComplete="new-password"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="form-label">
+              Confirm Password
+            </label>
             <input
+              id="confirmPassword"
               type="password"
               name="confirmPassword"
               className="form-input"
@@ -119,6 +133,7 @@ const SignupPage = () => {
               onChange={handleChange}
               required
               placeholder="Confirm your password"
+              autoComplete="new-password"
             />
           </div>
 

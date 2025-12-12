@@ -7,7 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { disconnect } = useDisconnectWallet();
+  const { mutate: disconnect } = useDisconnectWallet();
 
   useEffect(() => {
     // Check for saved token/user on startup

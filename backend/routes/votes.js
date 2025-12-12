@@ -32,10 +32,11 @@ router.post('/', auth, async (req, res) => {
         return res.status(400).json({ msg: 'Invalid candidate' });
     }
 
-    // Check if duplicate ID number used in this event
+    // Check if duplicate ID number used in this event (excluding rejected votes)
     const duplicateIdContext = await Vote.findOne({
         event: eventId,
-        'identityData.idNumber': identityData.idNumber
+        'identityData.idNumber': identityData.idNumber,
+        status: { $ne: 'rejected' } // Ignore rejected votes
     });
     
     if (duplicateIdContext) {
@@ -49,10 +50,15 @@ router.post('/', auth, async (req, res) => {
     });
 
     if (existingVote) {
+      console.log('Found existing vote:', existingVote);
+      console.log('Strict equality check (rejected):', existingVote.status === 'rejected');
+      
       if (existingVote.status === 'rejected') {
+          console.log('Deleting rejected vote to allow re-vote');
           // Allow re-vote: Delete the rejected vote
           await Vote.deleteOne({ _id: existingVote._id });
       } else {
+          console.log('Vote exists and is not rejected. Status:', existingVote.status);
           return res.status(400).json({ msg: 'You have already voted in this event', status: existingVote.status });
       }
     }

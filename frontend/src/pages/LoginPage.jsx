@@ -57,26 +57,36 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Username</label>
+            <label htmlFor="username" className="form-label">
+              Username
+            </label>
             <input
+              id="username"
+              name="username"
               type="text"
               className="form-input"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               placeholder="Enter your username"
+              autoComplete="username"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
             <input
+              id="password"
+              name="password"
               type="password"
               className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Enter your password"
+              autoComplete="current-password"
             />
           </div>
 

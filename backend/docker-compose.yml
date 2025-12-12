@@ -8,6 +8,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/aiv-voting
       - PORT=5000
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - mongo
     networks:
@@ -15,7 +16,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev
+    command: sh -c "node seed.js && npm run dev"
 
   mongo:
     image: mongo:latest
@@ -25,6 +26,14 @@ services:
       - mongo-data:/data/db
     networks:
       - app-network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --url http://backend:5000
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
 networks:
   app-network:

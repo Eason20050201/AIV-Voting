@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -10,8 +10,6 @@ import MyVotingsPage from "./pages/MyVotingsPage";
 import MyCreatedVotingsPage from "./pages/MyCreatedVotingsPage";
 import ManageVotesPage from "./pages/ManageVotesPage";
 import ProfilePage from "./pages/ProfilePage";
-// import SettingsPage from './pages/SettingsPage'; // Keeping existing if needed, but not in routes
-// import VerificationPage from './pages/VerificationPage'; // Removed as we use modal now
 import { IotaProvider } from "./context/IotaProvider";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -22,7 +20,7 @@ import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <IotaProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Toaster
           position="top-center"
           reverseOrder={false}
@@ -116,7 +114,7 @@ function App() {
             </Route>
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </HashRouter>
     </IotaProvider>
   );
 }
