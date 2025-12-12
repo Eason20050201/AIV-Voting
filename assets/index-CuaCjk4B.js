@@ -35315,7 +35315,7 @@ const AuthContext = reactExports.createContext(null);
 const AuthProvider = ({ children }) => {
   const [user, setUser] = reactExports.useState(null);
   const [loading, setLoading] = reactExports.useState(true);
-  const { disconnect } = useDisconnectWallet();
+  const { mutate: disconnect } = useDisconnectWallet();
   reactExports.useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
