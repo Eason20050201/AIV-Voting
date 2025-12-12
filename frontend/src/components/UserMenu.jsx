@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import './UserMenu.css';
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./UserMenu.css";
 
 const UserMenu = () => {
   const { user, logout } = useAuth();
@@ -16,9 +16,9 @@ const UserMenu = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -26,18 +26,18 @@ const UserMenu = () => {
 
   // Generate initials (e.g., "Demo User" -> "DU")
   const getInitials = (name) => {
-    return (name || '')
-      .split(' ')
-      .map(part => part[0])
-      .join('')
+    return (name || "")
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   return (
     <div className="user-menu-container" ref={menuRef}>
-      <button 
-        className={`user-avatar-btn ${isOpen ? 'active' : ''}`}
+      <button
+        className={`user-avatar-btn ${isOpen ? "active" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="User menu"
       >
@@ -50,19 +50,27 @@ const UserMenu = () => {
             <span className="dropdown-user-name">{user.username}</span>
             <span className="dropdown-user-email">{user.email}</span>
           </div>
-          
-          <Link to="/profile" className="dropdown-item" onClick={() => setIsOpen(false)}>
+
+          <Link
+            to="/profile"
+            className="dropdown-item"
+            onClick={() => setIsOpen(false)}
+          >
             <span>👤</span> Profile
           </Link>
-          <Link to="/my-votings" className="dropdown-item" onClick={() => setIsOpen(false)}>
-            <span>🗳️</span> {user.role === 'organizer' ? 'My Created Votings' : 'My Voted Activities'}
+          <Link
+            to="/my-votings"
+            className="dropdown-item"
+            onClick={() => setIsOpen(false)}
+          >
+            <span>🗳️</span>{" "}
+            {user.role === "organizer"
+              ? "My Created Votings"
+              : "My Voted Activities"}
           </Link>
-          <Link to="/settings" className="dropdown-item" onClick={() => setIsOpen(false)}>
-            <span>⚙️</span> Settings
-          </Link>
-          
+
           <div className="dropdown-divider"></div>
-          
+
           <button className="dropdown-item danger" onClick={logout}>
             <span>🚪</span> Logout
           </button>

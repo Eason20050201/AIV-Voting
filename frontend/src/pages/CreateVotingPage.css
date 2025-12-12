@@ -57,6 +57,7 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   box-sizing: border-box; /* Explicitly set box-sizing */
+  color-scheme: dark; /* Ensure native date picker icons are light on dark background */
 }
 
 .form-input:focus,

@@ -2,6 +2,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./model/User');
+const Event = require('./model/Event');
+const Vote = require('./model/Vote');
 
 const seedData = async () => {
     try {
@@ -9,8 +11,10 @@ const seedData = async () => {
         console.log('✅ MongoDB Connected for Seeding');
 
         // Clear existing data
+        await Vote.deleteMany({});
+        await Event.deleteMany({});
         await User.deleteMany({});
-        console.log('🧹 Cleared User collection');
+        console.log('🧹 Cleared User, Event, and Vote collections');
 
         // Prepare users
         const users = [

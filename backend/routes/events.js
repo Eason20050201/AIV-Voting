@@ -10,16 +10,31 @@ const Vote = require('../model/Vote'); // Use Vote to calculate counts
 // @access  Private (Organizer only)
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, endDate, candidates } = req.body;
+    const { title, description, startDate, endDate, candidates } = req.body;
 
     // Check if user is organizer
     if (req.user.role !== 'organizer') {
       return res.status(403).json({ msg: 'Not authorized to create events' });
     }
 
+    // Date Validation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (start < today) {
+        return res.status(400).json({ msg: 'Start date cannot be in the past' });
+    }
+
+    if (end < start) {
+        return res.status(400).json({ msg: 'End date must be after start date' });
+    }
+
     const newEvent = new Event({
       title,
       description,
+      startDate,
       endDate,
       candidates,
       creator: req.user.id
@@ -47,7 +62,7 @@ router.get('/', async (req, res) => {
 });
 
 // @route   GET /api/events/created
-// @desc    Get events created by the logged in organizer
+// @desc    Get events created by the logged in organizer with pending vote counts
 // @access  Private
 router.get('/created', auth, async (req, res) => {
     try {
@@ -55,7 +70,23 @@ router.get('/created', auth, async (req, res) => {
             return res.status(403).json({ msg: 'Not authorized' });
         }
         const events = await Event.find({ creator: req.user.id }).sort({ createdAt: -1 });
-        res.json(events);
+        
+        // Get pending counts for these events
+        const eventIds = events.map(e => e._id);
+        const pendingCounts = await Vote.aggregate([
+            { $match: { event: { $in: eventIds }, status: 'pending' } },
+            { $group: { _id: '$event', count: { $sum: 1 } } }
+        ]);
+        
+        const eventsWithCounts = events.map(event => {
+            const countObj = pendingCounts.find(c => c._id.toString() === event._id.toString());
+            return {
+                ...event.toObject(),
+                pendingCount: countObj ? countObj.count : 0
+            };
+        });
+
+        res.json(eventsWithCounts);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

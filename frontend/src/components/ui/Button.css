@@ -83,3 +83,23 @@
 .btn-full {
   width: 100%;
 }
+
+.btn-success {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34c759;
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: rgba(52, 199, 89, 0.2);
+}
+
+.btn-warning {
+  background: rgba(255, 204, 0, 0.1);
+  color: #ffcc00;
+  border: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: rgba(255, 204, 0, 0.2);
+}

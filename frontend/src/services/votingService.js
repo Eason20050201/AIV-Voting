@@ -92,3 +92,11 @@ export const evaluateVote = async (voteId, status) => {
     if (!response.ok) throw new Error('Failed to evaluate vote');
     return response.json();
 };
+
+export const getVoteStatus = async (eventId) => {
+    const response = await fetch(`${API_BASE_URL}/votes/status/${eventId}`, {
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch vote status');
+    return response.json();
+};

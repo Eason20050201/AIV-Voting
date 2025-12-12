@@ -1,53 +1,62 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Button from '../components/ui/Button';
-import './SignupPage.css'; // Updated CSS Import
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Button from "../components/ui/Button";
+import { toast } from "react-hot-toast";
+import "./SignupPage.css"; // Updated CSS Import
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    role: 'voter' // Default role
+    username: "",
+    password: "",
+    confirmPassword: "",
+    role: "voter", // Default role
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
-      return setError('Passwords do not match');
+      toast.error("Passwords do not match");
+      return setError("Passwords do not match");
     }
 
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const result = await signup({
         username: formData.username,
         password: formData.password,
-        role: formData.role
+        role: formData.role,
       });
 
       if (result.success) {
-        navigate('/');
+        toast.success("Account created successfully!");
+        if (formData.role === "organizer") {
+          navigate("/my-created");
+        } else {
+          navigate("/");
+        }
       } else {
         setError(result.error);
+        toast.error(result.error);
       }
     } catch (err) {
-      setError('Failed to create account');
+      setError("Failed to create account");
+      toast.error("Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -57,7 +66,7 @@ const SignupPage = () => {
     <div className="signup-container">
       <div className="signup-card glass-panel">
         <h2 className="signup-title">Create Account</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="signup-form">
@@ -114,13 +123,15 @@ const SignupPage = () => {
           </div>
 
           <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? "Creating Account..." : "Sign Up"}
           </Button>
         </form>
 
         <div className="signup-footer">
-          Already have an account? 
-          <Link to="/login" className="auth-link">Login</Link>
+          Already have an account?
+          <Link to="/login" className="auth-link">
+            Login
+          </Link>
         </div>
       </div>
     </div>

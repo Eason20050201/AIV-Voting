@@ -10,8 +10,7 @@ const candidateSchema = new mongoose.Schema({
     required: true
   },
   role: {
-    type: String,
-    required: true
+    type: String
   },
   description: {
     type: String
@@ -37,8 +36,12 @@ const eventSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  startDate: {
+    type: String, // Storing as YYYY-MM-DD string
+    required: true
+  },
   endDate: {
-    type: String, // Storing as YYYY-MM-DD string as per frontend input
+    type: String, // Storing as YYYY-MM-DD string
     required: true
   },
   candidates: [candidateSchema],

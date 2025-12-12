@@ -11,6 +11,37 @@ router.post('/', auth, async (req, res) => {
   try {
     const { eventId, candidateId, identityData } = req.body;
 
+    // Check if user is a voter
+    if (req.user.role !== 'voter') {
+      return res.status(403).json({ msg: 'Organizers cannot vote' });
+    }
+
+    // Check if event exists and is ongoing
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ msg: 'Event not found' });
+    }
+
+    if (event.status !== 'ongoing') {
+      return res.status(400).json({ msg: 'Voting is not currently active for this event' });
+    }
+
+    // Check if candidate exists in the event
+    const validCandidate = event.candidates.find(c => c.id === candidateId);
+    if (!validCandidate) {
+        return res.status(400).json({ msg: 'Invalid candidate' });
+    }
+
+    // Check if duplicate ID number used in this event
+    const duplicateIdContext = await Vote.findOne({
+        event: eventId,
+        'identityData.idNumber': identityData.idNumber
+    });
+    
+    if (duplicateIdContext) {
+        return res.status(400).json({ msg: 'This ID number has already been used for voting in this event' });
+    }
+
     // Check if already voted
     const existingVote = await Vote.findOne({
       event: eventId,
@@ -18,7 +49,12 @@ router.post('/', auth, async (req, res) => {
     });
 
     if (existingVote) {
-      return res.status(400).json({ msg: 'You have already voted in this event', status: existingVote.status });
+      if (existingVote.status === 'rejected') {
+          // Allow re-vote: Delete the rejected vote
+          await Vote.deleteOne({ _id: existingVote._id });
+      } else {
+          return res.status(400).json({ msg: 'You have already voted in this event', status: existingVote.status });
+      }
     }
 
     const newVote = new Vote({
@@ -105,6 +141,27 @@ router.patch('/:id/evaluate', auth, async (req, res) => {
     await vote.save();
 
     res.json(vote);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   GET /api/votes/status/:eventId
+// @desc    Get current user's vote status for an event
+// @access  Private
+router.get('/status/:eventId', auth, async (req, res) => {
+  try {
+    const vote = await Vote.findOne({ 
+      event: req.params.eventId, 
+      voter: req.user.id 
+    });
+
+    if (!vote) {
+      return res.json({ status: null });
+    }
+
+    res.json({ status: vote.status });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
