@@ -48,7 +48,7 @@ We use Docker Compose to run the Backend, MongoDB, and Cloudflare Tunnel togethe
         VITE_API_BASE_URL=https://your-tunnel-url.trycloudflare.com/api
         ```
 
-    注意：`/api`
+    注意：後面要加上`/api`
 
 2.  **Deploy to GitHub Pages:**
     Navigate to the frontend directory and run the deploy script.
