@@ -1,0 +1,11 @@
+{
+    "NODE_URL": "https://api.testnet.iota.cafe",
+    "FAUCET_URL": "https://faucet.testnet.iota.cafe/gas",
+    "PACKAGE_ID": "0x22ba1291ae6073eaeaaf11a53dd4b055ad3990ef1792c4f14ffd463879fca8a5",
+    "VOTE_EVENT_ID": "",
+    "ADMIN_SecretKey": "iotaprivkey1qrgcnzrlxludf98yzcge3aumyzl85zzqta0425yscu2p9u35sfmsqsrcavd",
+    "VOTER_SecretKey": "iotaprivkey1qpa5dfusn4z46wy94g89n5e3lrcdtqgqe4l5k3y06fx246y5nfzwc3f7mgh",
+    "EA_PrivateKey_PEM": "-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBAI+z4I6x8P5VPCm21cIMlreP3F8gJJpLMCcLclDd69dtfqMRYN9Z\nVdOKqk99G1iTf0n4wCvPCR+WWAoEN8tTBckCAwEAAQJAcabZ2wFwkDXpNzSbKrW6\nHcNxjuplCIKeusKazso1VFLYOK+aOlkY9HWvOVdE8wXA1go+lzoF9m3+Nrz2Pyrp\ngQIhAOc5Njdrk3j9bsUleWZc3UpK29Q/15bHmFgjnoSEEK9FAiEAnxnYOT9c+xNH\n2qiehkS3kiXR3WnZgp7bj72k+W6HUrUCIAJikLCZp3fEBXR7Inlv08iEZSgXUH35\nqRSfqW7sfc+RAiBFerfeaDlmvAjJCJIR+Lhh7nozwyHl1RH1N9BvzUDzcQIgcYiS\nB/JaLjKneP4GIH6dCd/2+KAbuOi5i+lfGCtCiy4=\n-----END RSA PRIVATE KEY-----",
+    "EA_PrivateKey_X25519": "mOuZLutG2nP5D0gpfmbqMXrk81/NolFliJ3nG7AgZIo=",
+    "EA_PublicKey_X25519": "c6eluPMdVDJ6l1RhIOZZP1o10j3JyuGaJhtYowRMSkU="
+}
