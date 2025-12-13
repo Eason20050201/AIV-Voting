@@ -44,11 +44,11 @@ We use Docker Compose to run the Backend, MongoDB, and Cloudflare Tunnel togethe
 1.  **Update the API URL:**
     Open `frontend/.env.production` and paste the URL you got from the storage step above.
 
-    ```env
-    VITE_API_BASE_URL=https://your-tunnel-url.trycloudflare.com/api/auth
-    ```
+        ```env
+        VITE_API_BASE_URL=https://your-tunnel-url.trycloudflare.com/api
+        ```
 
-    _(Note: Keep the `/api/auth` suffix)_
+    注意：`/api`
 
 2.  **Deploy to GitHub Pages:**
     Navigate to the frontend directory and run the deploy script.
