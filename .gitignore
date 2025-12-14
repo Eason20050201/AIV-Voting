@@ -36,3 +36,8 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# IOTA / Voting App
+iota_test/test_config.json
+output.txt
+**/*.log

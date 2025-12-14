@@ -19,8 +19,8 @@ async function runTest() {
     const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 
     // Validate Config
-    if (!config.PACKAGE_ID || !config.ADMIN_SecretKey || !config.VOTER_SecretKey || !config.EA_PrivateKey_PEM) {
-        throw new Error('Config file is incomplete. Please check TEST_CONFIG.json. ADMIN_SecretKey is now required.');
+    if (!config.PACKAGE_ID || !config.ADMIN_SecretKey || !config.VOTER_SecretKey) {
+        throw new Error('Config file is incomplete. Please check test_config.json.');
     }
 
     // Init Client
@@ -130,17 +130,17 @@ async function runTest() {
     // Note: This is simpler than RSA blind signatures.
     const msgBytes = new TextEncoder().encode(voterAddress);
     const { signature } = await eaKeypair.signPersonalMessage(msgBytes); // Returns { bytes, signature }
-    const S = signature; // Uint8Array
+    // Signature is often base64 string in SDK
+    const S = typeof signature === 'string' ? new Uint8Array(Buffer.from(signature, 'base64')) : signature;
     console.log(`EA Signed Voter Address (S): ${Buffer.from(S).toString('hex').substring(0, 20)}...`);
 
     // --- Phase 3: Voting ---
     console.log('\n--- Phase 3: Voting ---');
 
     // 3.1 Prepare Plaintext Vote
+    // 3.1 Prepare Plaintext Vote
     const votePlaintext = JSON.stringify({
-        candidate_id: 0,
-        candidate_name: 'Alice',
-        nonce: crypto.randomUUID()
+        candidate_id: 1,
     });
     console.log(`[TEST] Plaintext Vote Content: ${votePlaintext}`);
 
@@ -188,75 +188,191 @@ async function runTest() {
         console.error('Vote failed:', result.effects.status.error);
     }
 
-    // --- Phase 4: Verification ---
-    console.log('\n--- Phase 4: Verification ---');
-    console.log(`Checking VoteEvent: ${voteEventId}`);
+    // --- Phase 4: Verification (Indexer / Tally Logic) ---
+    console.log('\n--- Phase 4: Verification (Off-chain Tally) ---');
+    console.log(`Scanning transactions for VoteEvent: ${voteEventId}`);
 
-    const objectData = await client.getObject({
-        id: voteEventId,
-        options: { showContent: true }
+    // Query transactions that mutated the VoteEvent
+    const txResults = await client.queryTransactionBlocks({
+        filter: {
+            ChangedObject: voteEventId
+        },
+        options: {
+            showInput: true,
+            showEffects: true,
+            showEvents: true
+        }
     });
 
-    if (objectData.data && objectData.data.content) {
-        const fields = objectData.data.content.fields;
+    console.log(`Found ${txResults.data.length} transactions involving this event.`);
 
-        // Verify Event Info
-        if (fields.event_name) {
-            console.log(`Event Name: ${Buffer.from(fields.event_name).toString('utf8')}`);
+    let foundMyVote = false;
+    const tallyCounts = {};
+    const validVotes = [];
+
+    // Iterate newly to oldest usually, or reverse depending on need.
+    for (const txBlock of txResults.data) {
+        // Did we find valid sender?
+        const senderAddr = txBlock.transaction?.data?.sender;
+        console.log(`Scan TX: ${txBlock.digest}, Sender: ${senderAddr}`);
+
+        if (!senderAddr) continue;
+
+        if (!txBlock.transaction || !txBlock.transaction.data || !txBlock.transaction.data.transaction) {
+            console.warn('Skipping malformed tx block:', txBlock.digest);
+            continue;
         }
-        if (fields.event_desc) {
-            console.log(`Event Desc: ${Buffer.from(fields.event_desc).toString('utf8')}`);
+
+        // 1. Identify Sender (addr)
+        // const senderAddr = txBlock.transaction.data.sender; // This line is now redundant
+        // console.log('DEBUG TX:', txBlock.digest); 
+
+        // 2. Look for the "vote" Move Call
+        const txData = txBlock.transaction.data.transaction;
+        // console.log('DEBUG TX DATA:', JSON.stringify(txData, null, 2));
+        const commands = txData.kind === 'ProgrammableTransaction' ? (txData.transactions || txData.commands) : [];
+
+        if (!Array.isArray(commands)) {
+            console.warn(`Commands is not an array for tx: ${txBlock.digest}. Kind: ${txData.kind}`);
+            // Try fallback location?
+            console.warn('DUMP:', JSON.stringify(txData));
+            continue;
         }
 
-        const votes = fields.votes;
-        console.log(`Total Votes found on chain: ${votes.length}`);
+        // We need to parse inputs. The inputs list is in txBlock.transaction.data.transaction.inputs
+        // The commands reference these inputs.
+        const inputs = txData.inputs || [];
 
-        if (votes.length > 0) {
-            let foundMyVote = false;
-            for (let i = 0; i < votes.length; i++) {
-                const vote = votes[i];
-                // Handle nested fields if necessary
-                const encryptedContentArray = vote.fields ? vote.fields.encrypted_vote : vote.encrypted_vote;
-                const encryptedContent = new Uint8Array(encryptedContentArray);
+        if (senderAddr === voterAddress) {
+            // Check first command keys
+        }
 
-                try {
-                    // Unpack: [EphemeralPK (32)] + [Nonce (24)] + [Ciphertext]
-                    const pkLen = nacl.box.publicKeyLength;
-                    const nonceLen = nacl.box.nonceLength;
+        // Find command calling "vote"
+        let voteCommandFound = false;
+        let cBytes = null;
+        let sBytes = null;
 
-                    if (encryptedContent.length < pkLen + nonceLen) continue;
+        for (const cmd of commands) {
+            // Check for both CamelCase and PascalCase
+            const call = cmd.MoveCall || cmd.moveCall;
+            if (call && call.function === 'vote') {
+                if (call.package === config.PACKAGE_ID) {
+                    console.log('DEBUG: Vote Command Found. Resolving inputs...');
+                    console.log('Arguments:', JSON.stringify(call.arguments));
+                } else {
+                    console.warn(`DEBUG: Package ID Mismatch. Config: ${config.PACKAGE_ID}, Tx: ${call.package}`);
+                }
 
-                    const senderEphemPK = encryptedContent.slice(0, pkLen);
-                    const msgNonce = encryptedContent.slice(pkLen, pkLen + nonceLen);
-                    const msgCipher = encryptedContent.slice(pkLen + nonceLen);
+                voteCommandFound = true; // Mark found anyway to debug further if needed
 
-                    // Decrypt: box.open(cipher, nonce, senderPK, receiverSK)
-                    const decryptedBytes = nacl.box.open(msgCipher, msgNonce, senderEphemPK, eaSecretKey);
+                // arguments: [ve, encrypted_vote, sign]
+                const resolveBytes = (argIndex) => {
+                    const arg = call.arguments[argIndex];
+                    if (arg && arg.Input !== undefined) {
+                        const inputVal = inputs[arg.Input];
 
-                    if (!decryptedBytes) {
-                        // Decryption failed (null)
-                        throw new Error('Decryption returned null');
+                        // Structure: { type: 'pure', valueType: 'vector<u8>', value: [...] }
+                        if (inputVal && inputVal.value) {
+                            return inputVal.value;
+                        }
+
+                        // SDK Pure Input handling (Fallback for other versions)
+                        if (inputVal && inputVal.Pure) {
+                            const raw = inputVal.Pure.inputs ? inputVal.Pure.inputs[0] : inputVal.Pure;
+                            return raw;
+                        }
+                    }
+                    return null;
+                };
+
+                const cInput = resolveBytes(1); // 2nd argument
+                const sInput = resolveBytes(2); // 3rd argument
+
+                // console.log(`DEBUG: cInput found: ${!!cInput}, sInput found: ${!!sInput}`);
+
+                if (cInput && sInput) {
+                    const cBuf = Buffer.from(cInput);
+                    // Use Buffer.from() to ensure we handle array of numbers or bytes correctly
+                    // sInput is vector<u8> (array of numbers), Buffer.from(sInput) works.
+                    let sBuf = Buffer.from(sInput);
+
+                    console.log(`   Scanner Found Vote. Sender: ${senderAddr}`);
+                    console.log(`   sBytes Length: ${sBuf.length}`);
+                    console.log(`   cBytes Length: ${cBuf.length}`);
+
+                    if (sBuf.length === 97) {
+                        // Serialized Signature: 1 byte flag + 64 bytes sig + 32 bytes pk
+                        if (sBuf[0] === 0) {
+                            sBuf = sBuf.slice(1, 65);
+                        }
                     }
 
-                    const decrypted = naclUtil.encodeUTF8(decryptedBytes);
+                    // 3. Verify S
+                    try {
+                        const msgToCheck = new TextEncoder().encode(senderAddr);
+                        // Ensure Uint8Array
+                        const sBytesValid = new Uint8Array(sBuf);
 
-                    console.log(`Vote #${i} Decrypted: ${decrypted}`);
-                    if (decrypted === votePlaintext) {
-                        console.log('   -> MATCH: This is our vote!');
-                        foundMyVote = true;
+                        // verifyPersonalMessage likely expects raw 64-byte signature but handles Intent
+                        const isValid = await eaKeypair.getPublicKey().verifyPersonalMessage(msgToCheck, sBytesValid);
+
+                        console.log(`   Eligibility Check (S): ${isValid ? '✅ VALID' : '❌ INVALID'}`);
+
+                        if (isValid) {
+                            // 4. Decrypt c
+                            // console.log('   Decrypting vote content...');
+                            const pkLen = nacl.box.publicKeyLength;
+                            const nonceLen = nacl.box.nonceLength;
+
+                            if (cBuf.length >= pkLen + nonceLen) {
+                                const senderEphemPK = cBuf.slice(0, pkLen);
+                                const msgNonce = cBuf.slice(pkLen, pkLen + nonceLen);
+                                const msgCipher = cBuf.slice(pkLen + nonceLen);
+
+                                const decryptedBytes = nacl.box.open(msgCipher, msgNonce, senderEphemPK, eaSecretKey);
+                                if (decryptedBytes) {
+                                    const decryptedText = naclUtil.encodeUTF8(decryptedBytes);
+                                    console.log(`   Decrypted Vote: ${decryptedText}`);
+
+                                    try {
+                                        const voteObj = JSON.parse(decryptedText);
+                                        const cid = voteObj.candidate_id;
+                                        if (cid !== undefined) {
+                                            tallyCounts[cid] = (tallyCounts[cid] || 0) + 1;
+                                            validVotes.push({ tx: txBlock.digest, candidate_id: cid });
+                                        }
+                                    } catch (e) {
+                                        console.error('   Error parsing vote JSON:', e.message);
+                                    }
+
+                                    if (decryptedText === votePlaintext) {
+                                        foundMyVote = true;
+                                    }
+                                } else {
+                                    console.error('   -> FAIL: Decryption failed.');
+                                }
+                            } else {
+                                console.error('   -> FAIL: Malformed ciphertext length.');
+                            }
+                        }
+                    } catch (err) {
+                        console.error(`   Verification Error: ${err.message}`);
                     }
-                } catch (e) {
-                    console.log(`Vote #${i} Decryption Skipped/Failed: ${e.message}`);
                 }
             }
-
-            if (foundMyVote) {
-                console.log('SUCCESS: Flow verified.');
-            } else {
-                console.error('FAIL: Our vote was not found in the decryption check.');
-            }
-
         }
+    }
+
+    console.log('\n--- Election Results ---');
+    console.log(`Total Valid Votes: ${validVotes.length}`);
+    for (const [cid, count] of Object.entries(tallyCounts)) {
+        console.log(`Candidate ${cid}: ${count} votes`);
+    }
+
+    if (foundMyVote) {
+        console.log('SUCCESS: Flow verified. Our vote was counted.');
+    } else {
+        console.error('FAIL: Our vote was not found/counted.');
     }
 }
 

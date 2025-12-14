@@ -60,7 +60,7 @@ export const authService = {
   submitVerification: async (userId, verificationData) => {
     // TODO: Implement backend endpoint for verification
     console.warn('Backend verification endpoint not implemented. Auto-verifying for demo.');
-    
+
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
