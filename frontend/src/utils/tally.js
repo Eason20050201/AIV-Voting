@@ -2,6 +2,7 @@ import { IotaClient } from "@iota/iota-sdk/client";
 import nacl from "tweetnacl";
 import naclUtil from "tweetnacl-util";
 import { Ed25519PublicKey } from "@iota/iota-sdk/keypairs/ed25519";
+import { getRejectedWallets } from "../services/votingService";
 
 export const tallyOnChainVotes = async (event, eaParams) => {
     // eaParams: { encryptionPrivateKey (base64 string) }
@@ -41,6 +42,21 @@ export const tallyOnChainVotes = async (event, eaParams) => {
 
     console.log(`Found ${allTxBlocks.length} transactions.`);
 
+    console.log(`Found ${allTxBlocks.length} transactions.`);
+
+    // 3. Fetch Rejected Wallets (from Backend)
+    let rejectedSet = new Set();
+    try {
+        const rejectedWallets = await getRejectedWallets(event._id);
+        rejectedWallets.forEach(addr => rejectedSet.add(addr));
+        console.log(`Loaded ${rejectedSet.size} rejected wallets.`);
+    } catch (e) {
+        console.error("Failed to load rejected wallets:", e);
+        // Fallback: Proceed without filtering? Or stop? 
+        // Safer to warn but proceed, or maybe user wants to know.
+        // For now log and proceed.
+    }
+
     const tally = {};
     const validVotes = [];
     const seenSenders = new Set(); // Track unique voters
@@ -73,6 +89,11 @@ export const tallyOnChainVotes = async (event, eaParams) => {
 
         if (seenSenders.has(sender)) {
             console.log(`Skipping duplicate vote from ${sender}`);
+            continue;
+        }
+
+        if (rejectedSet.has(sender)) {
+            console.log(`Skipping REJECTED vote from ${sender}`);
             continue;
         }
 

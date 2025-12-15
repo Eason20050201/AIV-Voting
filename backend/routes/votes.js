@@ -12,13 +12,30 @@ if (!EA_SECRET_KEY) {
 }
 const eaKeypair = EA_SECRET_KEY ? Ed25519Keypair.fromSecretKey(EA_SECRET_KEY) : null;
 
+// @route   GET /api/votes/event/:eventId/rejected-wallets
+router.get('/event/:eventId/rejected-wallets', auth, async (req, res) => {
+    try {
+        const votes = await Vote.find({
+            event: req.params.eventId,
+            status: 'rejected',
+            walletAddress: { $exists: true, $ne: null }
+        }).select('walletAddress');
+
+        const addresses = votes.map(v => v.walletAddress);
+        res.json(addresses);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 
 // @route   POST /api/votes
 // @desc    Cast a vote
 // @access  Private
 router.post('/', auth, async (req, res) => {
   try {
-    const { eventId, candidateId, identityData } = req.body;
+    const { eventId, candidateId, identityData, walletAddress } = req.body;
 
     // Check if user is a voter
     if (req.user.role !== 'voter') {
@@ -77,6 +94,7 @@ router.post('/', auth, async (req, res) => {
       voter: req.user.id,
       candidateId,
       identityData, // { realName, idNumber }
+      walletAddress,
       status: 'pending' // Default to pending
     });
 

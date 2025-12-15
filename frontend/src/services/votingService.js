@@ -123,3 +123,11 @@ export const updateEventStatus = async (eventId, status) => {
     if (!response.ok) throw new Error('Failed to update event status');
     return response.json();
   };
+
+export const getRejectedWallets = async (eventId) => {
+  const response = await fetch(`${API_BASE_URL}/votes/event/${eventId}/rejected-wallets`, {
+    headers: getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch rejected wallets');
+  return response.json();
+};

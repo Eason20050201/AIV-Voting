@@ -25,6 +25,10 @@ const voteSchema = new mongoose.Schema({
       required: true
     }
   },
+  walletAddress: {
+    type: String, 
+    required: false // Optional for backward compatibility
+  },
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected'],

@@ -170,6 +170,7 @@ const VotingPage = () => {
         eventId: id,
         candidateId: selectedCandidate,
         identityData,
+        walletAddress: currentAccount.address,
       });
 
       toast.success(
