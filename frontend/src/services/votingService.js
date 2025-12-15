@@ -113,3 +113,13 @@ export const signEligibility = async (data) => {
   }
   return response.json();
 };
+
+export const updateEventStatus = async (eventId, status) => {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/status`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ status })
+    });
+    if (!response.ok) throw new Error('Failed to update event status');
+    return response.json();
+  };

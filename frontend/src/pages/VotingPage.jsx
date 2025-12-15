@@ -19,6 +19,7 @@ import {
 } from "@iota/dapp-kit";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { encryptVote } from "../utils/crypto";
+import naclUtil from "tweetnacl-util";
 
 const VotingPage = () => {
   const { id } = useParams();
@@ -99,7 +100,13 @@ const VotingPage = () => {
     try {
       // 1. Get current config
       const packageId = import.meta.env.VITE_PACKAGE_ID;
-      const eaPublicKey = import.meta.env.VITE_EA_PUBLIC_KEY_X25519;
+
+      // PREFER Event-Specific Key, fallback to Global Env Key
+      let eaPublicKey = event.organizerKeys?.encryption?.public;
+      if (!eaPublicKey) {
+        console.warn("Event has no encryption key, falling back to ENV");
+        eaPublicKey = import.meta.env.VITE_EA_PUBLIC_KEY_X25519;
+      }
 
       if (!packageId || !eaPublicKey) {
         throw new Error(
@@ -134,20 +141,28 @@ const VotingPage = () => {
       const encryptedVote = encryptVote(voteContent, eaPublicKey);
 
       // 4. Construct Transaction
+      console.log("--- constructing vote transaction ---");
+      console.log("Event OnChainID:", event.onChainId);
+      console.log("Encrypted Vote (len):", encryptedVote.length);
+      console.log("Signature (len):", naclUtil.decodeBase64(signature).length);
+
       const tx = new Transaction();
       tx.moveCall({
         target: `${packageId}::vote_event::vote`,
         arguments: [
           tx.object(event.onChainId),
           tx.pure.vector("u8", encryptedVote),
-          tx.pure.vector("u8", Array.from(Buffer.from(signature, "base64"))),
+          tx.pure.vector("u8", Array.from(naclUtil.decodeBase64(signature))),
         ],
       });
 
       // 5. Submit to IOTA
-      await signAndExecuteTransaction({
+      console.log("Submitting transaction to wallet...");
+      const result = await signAndExecuteTransaction({
         transaction: tx,
       });
+      console.log("Transaction Submitted! Digest:", result.digest);
+      console.log("Transaction Effects:", result);
 
       // 6. Record in Backend (Hybrid)
       // If chain success, we record it in DB so UI updates nicely
@@ -242,6 +257,120 @@ const VotingPage = () => {
             </span>
           </div>
         </header>
+
+        {/* Technical Details Section */}
+        <div
+          className="technical-details"
+          style={{
+            marginBottom: "2rem",
+            padding: "1rem",
+            background: "rgba(0, 0, 0, 0.2)",
+            borderRadius: "0.75rem",
+            border: "1px solid rgba(255, 255, 255, 0.05)",
+          }}
+        >
+          <h3
+            style={{ marginBottom: "1rem", fontSize: "1rem", color: "#94a3b8" }}
+          >
+            🔐 Blockchain & Security Details
+          </h3>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "0.5rem",
+              fontSize: "0.85rem",
+              fontFamily: "monospace",
+            }}
+          >
+            <div>
+              <span style={{ color: "#64748b" }}>On-Chain ID:</span>
+              <div
+                style={{
+                  wordBreak: "break-all",
+                  color: "#e2e8f0",
+                  marginTop: "0.25rem",
+                }}
+              >
+                {event.onChainId || "Not on-chain"}
+              </div>
+            </div>
+
+            {event.organizerKeys?.encryption && (
+              <div style={{ marginTop: "0.5rem" }}>
+                <span style={{ color: "#64748b" }}>
+                  Encryption Key (X25519):
+                </span>
+                <div
+                  style={{
+                    wordBreak: "break-all",
+                    color: "#e2e8f0",
+                    marginTop: "0.25rem",
+                  }}
+                >
+                  {event.organizerKeys.encryption.public}
+                </div>
+              </div>
+            )}
+
+            {event.organizerKeys?.signing && (
+              <div style={{ marginTop: "0.5rem" }}>
+                <span style={{ color: "#64748b" }}>
+                  Signing Key (RSA-Blind Public):
+                </span>
+                <div
+                  style={{
+                    wordBreak: "break-all",
+                    color: "#e2e8f0",
+                    marginTop: "0.25rem",
+                    fontSize: "0.75rem",
+                    maxHeight: "150px",
+                    overflowY: "auto",
+                    background: "rgba(0,0,0,0.2)",
+                    padding: "8px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {(() => {
+                    try {
+                      const jwk = JSON.parse(
+                        event.organizerKeys.signing.public
+                      );
+                      return (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <span
+                              style={{ color: "#94a3b8", marginRight: "4px" }}
+                            >
+                              Modulus (n):
+                            </span>
+                            {jwk.n}
+                          </div>
+                          <div>
+                            <span
+                              style={{ color: "#94a3b8", marginRight: "4px" }}
+                            >
+                              Exponent (e):
+                            </span>
+                            {jwk.e}
+                          </div>
+                        </div>
+                      );
+                    } catch (e) {
+                      return event.organizerKeys.signing.public;
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="candidates-section">
           <h2>Cast Your Vote</h2>

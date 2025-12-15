@@ -103,6 +103,8 @@ const HomePage = () => {
                   votes={event.votes}
                   endDate={event.endDate}
                   voteStatus={userVotesMap[event._id || event.id]}
+                  onChainId={event.onChainId}
+                  organizerKeys={event.organizerKeys}
                 />
               ))}
             </div>

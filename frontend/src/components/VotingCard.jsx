@@ -15,6 +15,8 @@ const VotingCard = ({
   endDate,
   voteStatus,
   children,
+  onChainId,
+  organizerKeys,
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -105,6 +107,50 @@ const VotingCard = ({
 
       <h3 className="event-title">{title}</h3>
       <p className="event-description">{description}</p>
+
+      {/* Key Info Section */}
+      <div
+        className="key-info"
+        style={{
+          fontSize: "0.75rem",
+          color: "rgba(255,255,255,0.5)",
+          marginBottom: "1rem",
+          fontFamily: "monospace",
+          background: "rgba(0,0,0,0.2)",
+          padding: "8px",
+          borderRadius: "6px",
+        }}
+      >
+        {onChainId && (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>ID:</span>
+            <span title={onChainId}>{onChainId.slice(0, 6)}...</span>
+          </div>
+        )}
+        {organizerKeys?.encryption?.public && (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Enc:</span>
+            <span title={organizerKeys.encryption.public}>
+              {organizerKeys.encryption.public.slice(0, 6)}...
+            </span>
+          </div>
+        )}
+        {organizerKeys?.signing?.public && (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Sign:</span>
+            <span title={"RSA Public Key"}>
+              {(() => {
+                try {
+                  const jwk = JSON.parse(organizerKeys.signing.public);
+                  return jwk.n ? jwk.n.slice(0, 6) + "..." : "RSA...";
+                } catch (e) {
+                  return "RSA...";
+                }
+              })()}
+            </span>
+          </div>
+        )}
+      </div>
 
       <div className="event-meta">
         {applies !== undefined ? (

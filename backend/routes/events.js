@@ -10,7 +10,7 @@ const Vote = require('../model/Vote'); // Use Vote to calculate counts
 // @access  Private (Organizer only)
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, startDate, endDate, candidates } = req.body;
+    const { title, description, startDate, endDate, candidates, onChainId, organizerKeys } = req.body;
 
     // Check if user is organizer
     if (req.user.role !== 'organizer') {
@@ -37,7 +37,9 @@ router.post('/', auth, async (req, res) => {
       startDate,
       endDate,
       candidates,
-      creator: req.user.id
+      creator: req.user.id,
+      onChainId, // Save the IOTA Object ID
+      organizerKeys
     });
 
     const event = await newEvent.save();
@@ -124,6 +126,16 @@ router.get('/:id', async (req, res) => {
        return { ...candidate, voteCount: count };
     });
 
+    // Check if event should be ended based on time
+    if (event.status === 'ongoing' && event.endDate) {
+        const endDate = new Date(event.endDate);
+        if (new Date() > endDate) {
+            console.log(`Event ${event._id} has ended by date. Updating status.`);
+            event.status = 'ended';
+            await event.save();
+        }
+    }
+
     res.json(eventObj);
   } catch (err) {
     console.error(err.message);
@@ -132,6 +144,34 @@ router.get('/:id', async (req, res) => {
     }
     res.status(500).send('Server Error');
   }
+});
+
+// @route   PATCH /api/events/:id/status
+// @desc    Update event status (e.g. End Event)
+// @access  Private (Organizer only)
+router.patch('/:id/status', auth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        
+        if (!['upcoming', 'ongoing', 'ended'].includes(status)) {
+            return res.status(400).json({ msg: 'Invalid status' });
+        }
+
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ msg: 'Event not found' });
+
+        // Check authorization
+        if (event.creator.toString() !== req.user.id) {
+            return res.status(403).json({ msg: 'Not authorized' });
+        }
+
+        event.status = status;
+        await event.save();
+        res.json(event);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
 });
 
 module.exports = router;

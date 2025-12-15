@@ -40,6 +40,16 @@ const eventSchema = new mongoose.Schema({
     type: String, // The IOTA Move Object ID
     required: false // Optional for backward compatibility/hybrid
   },
+  organizerKeys: {
+    encryption: {
+      public: String,
+      private: String
+    },
+    signing: {
+      public: String,
+      private: String
+    }
+  },
   startDate: {
     type: String, // Storing as YYYY-MM-DD string
     required: true

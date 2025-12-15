@@ -210,6 +210,17 @@ router.post('/sign-eligibility', auth, async (req, res) => {
             return res.status(400).json({ msg: 'Voting is not active' });
         }
 
+        // Check for Event-Specific Signing Key (Future Proofing)
+        // Currently, we still sign with the global EA Key because the Move Contract 
+        // likely verifies against a fixed authority or the creator's address (which we can't sign for).
+        // However, we log if this event has its own keys.
+        if (event.organizerKeys && event.organizerKeys.signing && event.organizerKeys.signing.private) {
+            console.log(`[Info] Event ${eventId} has its own signing keys stored. Using Global EA Key for now to match Contract Authorization.`);
+            // TODO: In future, if Contract allows delegated authorities, load this private key:
+            // const keyData = JSON.parse(event.organizerKeys.signing.private);
+            // signingKeypair = ...
+        }
+
         // 3. Check Duplicate ID
         const duplicateIdContext = await Vote.findOne({
             event: eventId,

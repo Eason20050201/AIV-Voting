@@ -5,12 +5,23 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import "./CreateVotingPage.css";
 import Button from "../components/ui/Button";
-import { useCurrentAccount } from "@iota/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useIotaClient,
+} from "@iota/dapp-kit";
+import { Transaction } from "@iota/iota-sdk/transactions";
+import nacl from "tweetnacl";
+import naclUtil from "tweetnacl-util";
+import { RSABSSA } from "@cloudflare/blindrsa-ts";
 
 const CreateVotingPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } =
+    useSignAndExecuteTransaction();
+  const client = useIotaClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -100,12 +111,139 @@ const CreateVotingPage = () => {
     }
 
     setLoading(true);
+    let onChainId = null;
+
     try {
+      const packageId = import.meta.env.VITE_PACKAGE_ID;
+      if (!packageId) {
+        throw new Error("Missing Package ID configuration");
+      }
+
+      // --- 1. Create Vote Event (On-Chain) ---
+      const tx = new Transaction();
+      // create_vote_event returns the Object
+      tx.moveCall({
+        target: `${packageId}::vote_event::create_vote_event`,
+        arguments: [],
+      });
+
+      const result = await signAndExecuteTransaction({
+        transaction: tx,
+        options: { showEffects: true, showObjectChanges: true },
+      });
+      console.log("Creation TX Result:", result);
+
+      // Robustness: If wallet doesn't return effects, fetch them
+      let effects = result.effects;
+      let objectChanges = result.objectChanges;
+
+      if (!effects || !objectChanges) {
+        console.log("Effects missing, fetching transaction...");
+        const txBlock = await client.waitForTransaction({
+          digest: result.digest,
+          options: { showEffects: true, showObjectChanges: true },
+        });
+        effects = txBlock.effects;
+        objectChanges = txBlock.objectChanges;
+      }
+
+      if (effects?.status?.status !== "success") {
+        throw new Error(
+          `Failed to create event on-chain: ${
+            effects?.status?.error || "Unknown error"
+          }`
+        );
+      }
+
+      // Extract Object ID
+      const created = objectChanges?.find(
+        (c) => c.type === "created" && c.objectType.includes("VoteEvent")
+      );
+      if (!created) {
+        throw new Error("VoteEvent object not found in transaction results");
+      }
+      onChainId = created.objectId;
+      console.log("Created On-Chain Event ID:", onChainId);
+
+      // --- 2. Add Info (Title, Desc) ---
+      // We do this in a separate transaction or same?
+      // For simplicity/safety on gas limits, separate might be safer but slower.
+      // Let's try to batch them if possible, but we need the object ID first which comes from the first TX.
+      // So we must wait.
+
+      const txInfo = new Transaction();
+      txInfo.moveCall({
+        target: `${packageId}::vote_event::add_vote_info`,
+        arguments: [
+          txInfo.object(onChainId),
+          txInfo.pure.string(formData.title),
+          txInfo.pure.string(formData.description),
+        ],
+      });
+
+      // --- 3. Add Candidates ---
+      // We can batch candidate additions into the SAME transaction as add_vote_info
+      for (const candidate of formData.candidates) {
+        // Note: candidates on chain need a name (vector<u8>)
+        txInfo.moveCall({
+          target: `${packageId}::vote_event::add_candidate`,
+          arguments: [
+            txInfo.object(onChainId),
+            txInfo.pure.string(candidate.name),
+          ],
+        });
+      }
+
+      await signAndExecuteTransaction({
+        transaction: txInfo,
+      });
+
+      // --- 4. Generate Organizer Keys (Double Key System) ---
+      console.log("Generating Organizer Keys...");
+
+      // A. Encryption Keys (X25519)
+      const encKeyPair = nacl.box.keyPair();
+      const encPublic = naclUtil.encodeBase64(encKeyPair.publicKey);
+      const encPrivate = naclUtil.encodeBase64(encKeyPair.secretKey);
+
+      // B. Signing Keys (RSA-Blind)
+      // Note: RSABSSA uses Web Crypto API
+      const suite = RSABSSA.SHA384.PSS.Randomized();
+      const rsaKeyPair = await RSABSSA.SHA384.generateKey({
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        modulusLength: 2048,
+      });
+
+      // Export RSA keys to store in DB (JWK format)
+      const rsaPub = await window.crypto.subtle.exportKey(
+        "jwk",
+        rsaKeyPair.publicKey
+      );
+      const rsaPriv = await window.crypto.subtle.exportKey(
+        "jwk",
+        rsaKeyPair.privateKey
+      );
+
+      const organizerKeys = {
+        encryption: {
+          public: encPublic,
+          private: encPrivate,
+        },
+        signing: {
+          public: JSON.stringify(rsaPub),
+          private: JSON.stringify(rsaPriv),
+        },
+      };
+
+      // --- 5. Save to Database ---
       await createEvent({
         ...formData,
-        creatorId: user.username, // Use logged in user's username
+        creatorId: user.username,
+        onChainId: onChainId,
+        organizerKeys: organizerKeys,
       });
-      toast.success("Event created successfully!");
+
+      toast.success("Event created successfully on-chain!");
       navigate("/my-created");
     } catch (error) {
       console.error("Failed to create event:", error);

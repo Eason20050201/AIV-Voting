@@ -9,6 +9,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/aiv-voting
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET}
+      - EA_SECRET_KEY=${EA_SECRET_KEY}
     depends_on:
       - mongo
     networks:

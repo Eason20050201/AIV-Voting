@@ -57,9 +57,10 @@ const MyCreatedVotingsPage = () => {
               title={event.title}
               description={event.description}
               status={event.status}
-              votes={event.votes}
               applies={event.pendingCount}
               endDate={event.endDate}
+              onChainId={event.onChainId}
+              organizerKeys={event.organizerKeys}
             >
               <div style={{ display: "flex", gap: "10px" }}>
                 <Link
