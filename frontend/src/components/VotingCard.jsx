@@ -34,10 +34,13 @@ const VotingCard = ({
     if (user?.role === "organizer") {
       return "View Details";
     }
+    // If ended, always show View Results first
+    if (status !== "ongoing") return "View Results";
+
     if (voteStatus === "pending") return "Vote Pending";
     if (voteStatus === "verified") return "Vote Verified";
     if (voteStatus === "rejected") return "Resubmit Vote";
-    if (status !== "ongoing") return "View Results"; // Or "Voting Closed"
+
     return "Vote Now";
   };
 

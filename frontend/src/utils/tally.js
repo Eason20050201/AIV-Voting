@@ -155,9 +155,9 @@ export const tallyOnChainVotes = async (event, eaParams) => {
                             if (decrypted) {
                                 const jsonStr = naclUtil.encodeUTF8(decrypted);
                                 const voteObj = JSON.parse(jsonStr);
-                                const cid = voteObj.candidate_id;
+                                const cid = String(voteObj.candidate_id);
                                 
-                                if (cid !== undefined) {
+                                if (cid !== undefined && cid !== "undefined") {
                                     tally[cid] = (tally[cid] || 0) + 1;
                                     validVotes.push({ tx: txBlock.digest, candidate_id: cid, sender });
                                     seenSenders.add(sender); // Mark sender as counted

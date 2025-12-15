@@ -112,7 +112,7 @@ router.get('/:id', async (req, res) => {
     ]);
     
     // Map votes to candidates
-    const eventObj = event.toObject();
+    const eventObj = event.toObject({ flattenMaps: true });
     eventObj.votes = 0; // Total verified votes
     
     // Update candidate vote counts in response
