@@ -101,16 +101,12 @@ const VotingPage = () => {
       // 1. Get current config
       const packageId = import.meta.env.VITE_PACKAGE_ID;
 
-      // PREFER Event-Specific Key, fallback to Global Env Key
-      let eaPublicKey = event.organizerKeys?.encryption?.public;
-      if (!eaPublicKey) {
-        console.warn("Event has no encryption key, falling back to ENV");
-        eaPublicKey = import.meta.env.VITE_EA_PUBLIC_KEY_X25519;
-      }
+      // PREFER Event-Specific Key
+      const eaPublicKey = event.organizerKeys?.encryption?.public;
 
       if (!packageId || !eaPublicKey) {
         throw new Error(
-          "Missing Voting Configuration (PackageID or Public Key)"
+          "Missing Voting Configuration (PackageID or Event Encryption Key)"
         );
       }
 
