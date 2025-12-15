@@ -16,6 +16,7 @@ app.use(cors({ origin: '*' }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/votes', require('./routes/votes'));
+app.use('/api/verification', require('./routes/verification'));
 
 const PORT = process.env.PORT || 5000;
 

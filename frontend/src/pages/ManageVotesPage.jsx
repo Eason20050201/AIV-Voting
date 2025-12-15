@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   getEventById,
-  getPendingVotes,
-  evaluateVote,
+  getPendingVerifications,
+  approveVerification,
+  rejectVerification,
 } from "../services/votingService";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
@@ -17,7 +18,7 @@ const ManageVotesPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [votes, setVotes] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tallyResult, setTallyResult] = useState(null);
   const [scanning, setScanning] = useState(false);
@@ -25,12 +26,12 @@ const ManageVotesPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [eventData, votesData] = await Promise.all([
+        const [eventData, requestsData] = await Promise.all([
           getEventById(eventId),
-          getPendingVotes(eventId),
+          getPendingVerifications(eventId),
         ]);
         setEvent(eventData);
-        setVotes(votesData);
+        setRequests(requestsData);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -41,14 +42,23 @@ const ManageVotesPage = () => {
     fetchData();
   }, [eventId]);
 
-  const handleEvaluate = async (voteId, status) => {
+  const handleApprove = async (requestId) => {
     try {
-      await evaluateVote(voteId, status);
-      // Remove the vote from the list
-      setVotes(votes.filter((v) => v._id !== voteId));
-      toast.success(`Vote ${status} successfully`);
+      await approveVerification(requestId);
+      setRequests(requests.filter((r) => r._id !== requestId));
+      toast.success("Identity Verified!");
     } catch (error) {
-      toast.error("Failed to update vote status: " + error.message);
+      toast.error("Failed to verify: " + error.message);
+    }
+  };
+
+  const handleReject = async (requestId) => {
+    try {
+      await rejectVerification(requestId);
+      setRequests(requests.filter((r) => r._id !== requestId));
+      toast.success("Request Rejected");
+    } catch (error) {
+      toast.error("Failed to reject: " + error.message);
     }
   };
 
@@ -252,18 +262,18 @@ const ManageVotesPage = () => {
         )}
       </div>
 
-      {votes.length === 0 ? (
+      {requests.length === 0 ? (
         <div className="empty-state">
-          <p>No pending votes to verify.</p>
+          <p>No pending verification requests.</p>
         </div>
       ) : (
         <div className="votes-list">
-          {votes.map((vote) => (
+          {requests.map((request) => (
             <VerificationVoteCard
-              key={vote._id}
-              vote={vote}
-              onVerify={(id) => handleEvaluate(id, "verified")}
-              onReject={(id) => handleEvaluate(id, "rejected")}
+              key={request._id}
+              vote={request}
+              onVerify={() => handleApprove(request._id)}
+              onReject={() => handleReject(request._id)}
             />
           ))}
         </div>

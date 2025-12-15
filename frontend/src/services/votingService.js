@@ -100,17 +100,55 @@ export const getVoteStatus = async (eventId) => {
   if (!response.ok) throw new Error('Failed to fetch vote status');
   return response.json();
 };
-// New function for IOTA signing
-export const signEligibility = async (data) => {
-  const response = await fetch(`${API_BASE_URL}/votes/sign-eligibility`, {
+// NEW Verification Flow Methods
+
+export const requestVerification = async (eventId, identityData, blindedMessage) => {
+  const response = await fetch(`${API_BASE_URL}/verification/request`, {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify({ eventId, identityData, blindedMessage }),
   });
   if (!response.ok) {
      const errorData = await response.json();
-     throw new Error(errorData.msg || 'Failed to sign eligibility');
+     throw new Error(errorData.msg || 'Failed to request verification');
   }
+  return response.json();
+};
+
+export const checkVerificationStatus = async (eventId) => {
+  const response = await fetch(`${API_BASE_URL}/verification/status/${eventId}`, {
+    headers: getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch verification status');
+  return response.json();
+};
+
+export const getPendingVerifications = async (eventId) => {
+  const response = await fetch(`${API_BASE_URL}/verification/pending/${eventId}`, {
+    headers: getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch pending verifications');
+  return response.json();
+};
+
+export const approveVerification = async (requestId) => {
+  const response = await fetch(`${API_BASE_URL}/verification/approve/${requestId}`, {
+    method: 'PATCH',
+    headers: getHeaders()
+  });
+  if (!response.ok) {
+     const errorData = await response.json();
+     throw new Error(errorData.msg || 'Failed to approve verification');
+  }
+  return response.json();
+};
+
+export const rejectVerification = async (requestId) => {
+  const response = await fetch(`${API_BASE_URL}/verification/reject/${requestId}`, {
+    method: 'PATCH',
+    headers: getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to reject verification');
   return response.json();
 };
 

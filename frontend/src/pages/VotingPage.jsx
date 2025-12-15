@@ -4,7 +4,8 @@ import {
   getEventById,
   castVote,
   getVoteStatus,
-  signEligibility,
+  requestVerification,
+  checkVerificationStatus,
 } from "../services/votingService";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
@@ -35,23 +36,85 @@ const VotingPage = () => {
     idNumber: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [voteStatus, setVoteStatus] = useState(null); // 'pending', 'verified', 'rejected', or null
+  const [voteStatus, setVoteStatus] = useState(null); // 'pending', 'verified', 'rejected', or null (Vote Status)
+  const [verificationStatus, setVerificationStatus] = useState(null); // 'pending', 'verified', 'rejected' (Identity Status)
   const [eligibilitySignature, setEligibilitySignature] = useState(null);
   const [verifiedIdentityData, setVerifiedIdentityData] = useState(null);
 
   useEffect(() => {
     const fetchEventAndStatus = async () => {
       try {
-        const [eventData, statusData] = await Promise.all([
+        const [eventData, statusData, verificationData] = await Promise.all([
           getEventById(id),
           user?.role === "voter"
             ? getVoteStatus(id)
+            : Promise.resolve({ status: null }),
+          user?.role === "voter"
+            ? checkVerificationStatus(id)
             : Promise.resolve({ status: null }),
         ]);
 
         setEvent(eventData);
         if (statusData?.status) {
           setVoteStatus(statusData.status);
+        }
+        if (verificationData?.status) {
+          setVerificationStatus(verificationData.status);
+          setVerifiedIdentityData(verificationData.identityData);
+
+          if (
+            verificationData.status === "verified" &&
+            verificationData.signature
+          ) {
+            // Attempt to Unblind
+            const invBase64 = localStorage.getItem(`blind_inv_${id}`);
+            if (invBase64) {
+              try {
+                const { RSABSSA } = await import("@cloudflare/blindrsa-ts");
+                const suite = RSABSSA.SHA384.PSS.Randomized();
+                const organizerPubJwk = JSON.parse(
+                  eventData.organizerKeys.signing.public
+                );
+                const publicDetails = await crypto.subtle.importKey(
+                  "jwk",
+                  organizerPubJwk,
+                  { name: "RSA-PSS", hash: "SHA-384" },
+                  true,
+                  ["verify"]
+                );
+
+                // We need currentAccount address for the message
+                if (!currentAccount?.address) {
+                  console.warn("Cannot unblind yet: Wallet not connected");
+                  return;
+                }
+
+                const message = new TextEncoder().encode(
+                  currentAccount.address
+                );
+                const inv = naclUtil.decodeBase64(invBase64);
+
+                // Get blind signature from response (Base64 -> Uint8Array)
+                const blindSignature = naclUtil.decodeBase64(
+                  verificationData.signature
+                );
+
+                const unblindedSig = await suite.finalize(
+                  publicDetails,
+                  message,
+                  blindSignature,
+                  inv
+                );
+
+                console.log("Unblinded Signature Successfully!");
+                setEligibilitySignature(unblindedSig);
+              } catch (e) {
+                console.error("Unblind error", e);
+                // If finalize fails (e.g. Inv invalid), we might need to reset?
+                // For now just log it.User might need to re-verify if they lost the Factor.
+              }
+            }
+          }
         }
       } catch (error) {
         console.error("Failed to fetch event data:", error);
@@ -61,7 +124,7 @@ const VotingPage = () => {
     };
 
     fetchEventAndStatus();
-  }, [id, user]);
+  }, [id, user, currentAccount]);
 
   const handleVoteClick = () => {
     if (!user) {
@@ -84,17 +147,35 @@ const VotingPage = () => {
       return;
     }
 
+    // Check Verification Status
+    if (verificationStatus === "pending") {
+      toast(
+        "Your identity verification is pending approval by the organizer.",
+        { icon: "⏳" }
+      );
+      return;
+    }
+
+    if (verificationStatus === "verified") {
+      // Proceed to vote
+      handleCastVoteTransaction();
+      return;
+    }
+
+    if (verificationStatus === "rejected") {
+      toast.error(
+        "Your previous verification request was rejected. Please update your details."
+      );
+      // Fall through to open modal
+    }
+
     if (voteStatus && voteStatus !== "rejected") {
       toast.error(`You have already voted. Status: ${voteStatus}`);
       return;
     }
 
-    if (eligibilitySignature) {
-      handleCastVoteTransaction();
-    } else {
-      // Open modal to get identity data
-      setShowIdentityModal(true);
-    }
+    // If not verified, open modal
+    setShowIdentityModal(true);
   };
 
   const { mutateAsync: signAndExecuteTransaction } =
@@ -104,30 +185,14 @@ const VotingPage = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // 1. Get current config
       const packageId = import.meta.env.VITE_PACKAGE_ID;
-
-      // PREFER Event-Specific Key
       const eaPublicKey = event.organizerKeys?.encryption?.public;
 
       if (!packageId || !eaPublicKey) {
-        throw new Error(
-          "Missing Voting Configuration (PackageID or Event Encryption Key)"
-        );
+        throw new Error("Missing Voting Configuration");
       }
 
-      if (!event.onChainId) {
-        // Fallback or Error?
-        // For now, let's assume if it exists we use it, otherwise error or plain DB vote?
-        // Let's enforce it for this 'Encrypted Voting' demo.
-        // Note: If you want to support legacy events, you can add a check here.
-        throw new Error(
-          "This event is not configured for on-chain voting (Missing onChainId)."
-        );
-      }
-
-      // 2. Blind Signature Flow
-      console.log("--- Starting Blind Signature Flow ---");
+      console.log("--- Starting Identity Request Flow ---");
       const { RSABSSA } = await import("@cloudflare/blindrsa-ts");
       const suite = RSABSSA.SHA384.PSS.Randomized();
 
@@ -147,35 +212,23 @@ const VotingPage = () => {
       // B. Blind
       const { blindedMsg, inv } = await suite.blind(publicDetails, message);
 
-      // C. Request Signature from Backend (Organizer)
-      const signResponse = await signEligibility({
-        eventId: id,
-        blindedMessage: naclUtil.encodeBase64(blindedMsg), // Encode to Base64
+      // Save 'inv' to LocalStorage for later unblinding
+      const invBase64 = naclUtil.encodeBase64(inv);
+      localStorage.setItem(`blind_inv_${id}`, invBase64);
+
+      // C. Request Verification from Backend
+      await requestVerification(
+        id,
         identityData,
-      });
-
-      const { signature: blindSignatureBase64 } = signResponse;
-      const blindSignature = naclUtil.decodeBase64(blindSignatureBase64);
-
-      // D. Unblind
-      const signature = await suite.finalize(
-        publicDetails,
-        message,
-        blindSignature,
-        inv
+        naclUtil.encodeBase64(blindedMsg)
       );
 
-      console.log("Unblinded Signature:", signature);
-
-      // Store Signature and Identity
-      setEligibilitySignature(signature);
-      setVerifiedIdentityData(identityData);
-
-      toast.success("Identity Verified! You can now cast your vote.");
+      toast.success("Verification Requested! Waiting for Organizer approval.");
+      setVerificationStatus("pending");
       setShowIdentityModal(false);
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Verification failed");
+      toast.error(error.message || "Verification request failed");
     } finally {
       setSubmitting(false);
     }
@@ -256,20 +309,32 @@ const VotingPage = () => {
 
   const getButtonText = () => {
     if (user?.role === "organizer") return "Organizers Cannot Vote";
-    if (voteStatus === "pending") return "Vote Pending";
-    if (voteStatus === "verified") return "Vote Verified";
-    if (voteStatus === "rejected") return "Resubmit Vote";
+    if (voteStatus) return "Vote Submitted"; // Any vote status implies completion
     if (event?.status !== "ongoing") return "Voting Closed";
-    if (eligibilitySignature) return "Cast Vote";
-    return "verify Identity";
+
+    if (verificationStatus === "pending") return "Verification Pending";
+    if (verificationStatus === "verified") return "Cast Vote";
+    if (verificationStatus === "rejected") return "Re-verify Identity";
+
+    return "Verify Identity";
   };
 
   const isButtonDisabled = () => {
     if (user?.role === "organizer") return true;
-    if (voteStatus && voteStatus !== "rejected") return true; // Disable if voted AND not rejected
+    if (voteStatus) return true;
 
     if (event?.status !== "ongoing") return true;
-    if (!selectedCandidate) return true;
+
+    if (verificationStatus === "pending") return true;
+
+    if (verificationStatus === "verified") {
+      if (!selectedCandidate) return true;
+      // Also check if we have the signature?
+      // if (!eligibilitySignature) return true; // Maybe loading?
+      return false;
+    }
+
+    // For "Verify Identity" or "Re-verify", enabled
     return false;
   };
 

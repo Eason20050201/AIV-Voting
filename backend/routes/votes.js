@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Vote = require('../model/Vote');
 const Event = require('../model/Event');
+const VerificationRequest = require('../model/VerificationRequest');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 
 // Load EA Keypair
@@ -40,6 +41,17 @@ router.post('/', auth, async (req, res) => {
     // Check if user is a voter
     if (req.user.role !== 'voter') {
       return res.status(403).json({ msg: 'Organizers cannot vote' });
+    }
+
+    // Verify User has been verified by Organizer
+    const verification = await VerificationRequest.findOne({
+        event: eventId,
+        voter: req.user.id,
+        status: 'verified'
+    });
+
+    if (!verification) {
+        return res.status(403).json({ msg: 'You have not been verified for this event.' });
     }
 
     // Check if event exists and is ongoing
@@ -199,100 +211,6 @@ router.get('/status/:eventId', auth, async (req, res) => {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
-});
-
-// @route   POST /api/votes/sign-eligibility
-// @desc    Check eligibility and return BLIND signature
-// @access  Private (Voter only)
-router.post('/sign-eligibility', auth, async (req, res) => {
-    try {
-        const { eventId, blindedMessage, identityData } = req.body;
-        // blindedMessage should be a base64 encoded string
-
-        if (!blindedMessage) {
-            return res.status(400).json({ msg: 'Blinded message is required' });
-        }
-
-        // 1. Authorization: Must be a voter
-        if (req.user.role !== 'voter') {
-            return res.status(403).json({ msg: 'Organizers cannot vote' });
-        }
-
-        // 2. Check Event Logic
-        const event = await Event.findById(eventId);
-        if (!event) return res.status(404).json({ msg: 'Event not found' });
-        if (event.status !== 'ongoing') {
-            return res.status(400).json({ msg: 'Voting is not active' });
-        }
-
-        // 3. Check Duplicate ID
-        const duplicateIdContext = await Vote.findOne({
-            event: eventId,
-            'identityData.idNumber': identityData.idNumber,
-            status: { $ne: 'rejected' }
-        });
-        if (duplicateIdContext) {
-            return res.status(400).json({ msg: 'ID already used' });
-        }
-
-        // 4. Check Double Voting (Database Record)
-        const existingVote = await Vote.findOne({
-            event: eventId,
-            voter: req.user.id
-        });
-
-        if (existingVote) {
-             if (existingVote.status === 'rejected') {
-                 // Allow retry
-             } else {
-                 return res.status(400).json({ msg: 'You have already voted (or have a pending vote)' });
-             }
-        }
-
-        // 5. Blind Sign
-        // Retrieve Event's Private Signing Key
-        if (!event.organizerKeys?.signing?.private) {
-            return res.status(500).json({ msg: 'Event signing configuration missing' });
-        }
-
-        // Current RSABSSA lib in Node environment
-        // We need to import the library and Web Crypto API polyfill if needed (Node 19+ has global crypto)
-        const { RSABSSA } = require('@cloudflare/blindrsa-ts');
-        
-        // Polyfill Web Crypto for Node 18
-        if (!globalThis.crypto) {
-            const { webcrypto } = require('node:crypto');
-            globalThis.crypto = webcrypto;
-        }
-
-        // Import Private Key (JWK)
-        const privateKeyJson = JSON.parse(event.organizerKeys.signing.private);
-        
-        // Note: usage for importing key
-        const privateKey = await crypto.subtle.importKey(
-            "jwk",
-            privateKeyJson,
-            {
-                name: "RSA-PSS",
-                hash: "SHA-384"
-            },
-            true,
-            ["sign"]
-        );
-
-        // Blind Sign the message
-        const blindedMsgUint8 = new Uint8Array(Buffer.from(blindedMessage, 'base64'));
-        const suite = RSABSSA.SHA384.PSS.Randomized();
-        const signature = await suite.blindSign(privateKey, blindedMsgUint8);
-
-        // Return the blinded signature (base64)
-        const signatureBase64 = Buffer.from(signature).toString('base64');
-        res.json({ signature: signatureBase64 });
-
-    } catch (err) {
-        console.error("Signing Error:", err);
-        res.status(500).json({ msg: 'Server Error: ' + err.message });
-    }
 });
 
 module.exports = router;
