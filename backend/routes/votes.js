@@ -202,18 +202,15 @@ router.get('/status/:eventId', auth, async (req, res) => {
 });
 
 // @route   POST /api/votes/sign-eligibility
-// @desc    Check eligibility and return signature for IOTA transaction
+// @desc    Check eligibility and return BLIND signature
 // @access  Private (Voter only)
 router.post('/sign-eligibility', auth, async (req, res) => {
     try {
-        if (!eaKeypair) {
-            return res.status(500).json({ msg: 'Server configuration error: EA Key missing' });
-        }
+        const { eventId, blindedMessage, identityData } = req.body;
+        // blindedMessage should be a base64 encoded string
 
-        const { eventId, voterAddress, identityData } = req.body;
-
-        if (!voterAddress) {
-            return res.status(400).json({ msg: 'Voter address is required' });
+        if (!blindedMessage) {
+            return res.status(400).json({ msg: 'Blinded message is required' });
         }
 
         // 1. Authorization: Must be a voter
@@ -221,22 +218,11 @@ router.post('/sign-eligibility', auth, async (req, res) => {
             return res.status(403).json({ msg: 'Organizers cannot vote' });
         }
 
-        // 2. Check Event Logic (Same as normal vote)
+        // 2. Check Event Logic
         const event = await Event.findById(eventId);
         if (!event) return res.status(404).json({ msg: 'Event not found' });
         if (event.status !== 'ongoing') {
             return res.status(400).json({ msg: 'Voting is not active' });
-        }
-
-        // Check for Event-Specific Signing Key (Future Proofing)
-        // Currently, we still sign with the global EA Key because the Move Contract 
-        // likely verifies against a fixed authority or the creator's address (which we can't sign for).
-        // However, we log if this event has its own keys.
-        if (event.organizerKeys && event.organizerKeys.signing && event.organizerKeys.signing.private) {
-            console.log(`[Info] Event ${eventId} has its own signing keys stored. Using Global EA Key for now to match Contract Authorization.`);
-            // TODO: In future, if Contract allows delegated authorities, load this private key:
-            // const keyData = JSON.parse(event.organizerKeys.signing.private);
-            // signingKeypair = ...
         }
 
         // 3. Check Duplicate ID
@@ -250,8 +236,6 @@ router.post('/sign-eligibility', auth, async (req, res) => {
         }
 
         // 4. Check Double Voting (Database Record)
-        // We still use MongoDB to track "attempts" or "status", although the real vote is on-chain.
-        // If we want to allow re-voting on rejection, we should check that here too.
         const existingVote = await Vote.findOne({
             event: eventId,
             voter: req.user.id
@@ -265,18 +249,49 @@ router.post('/sign-eligibility', auth, async (req, res) => {
              }
         }
 
-        // 5. Sign the Address
-        // The signature S = Sign(voterAddress)
-        // We assume voterAddress is passed as a string (e.g. 0x...)
-        const msgBytes = new TextEncoder().encode(voterAddress);
-        const { signature } = await eaKeypair.signPersonalMessage(msgBytes);
+        // 5. Blind Sign
+        // Retrieve Event's Private Signing Key
+        if (!event.organizerKeys?.signing?.private) {
+            return res.status(500).json({ msg: 'Event signing configuration missing' });
+        }
 
-        // Return the signature (base64) to the frontend
-        res.json({ signature });
+        // Current RSABSSA lib in Node environment
+        // We need to import the library and Web Crypto API polyfill if needed (Node 19+ has global crypto)
+        const { RSABSSA } = require('@cloudflare/blindrsa-ts');
+        
+        // Polyfill Web Crypto for Node 18
+        if (!globalThis.crypto) {
+            const { webcrypto } = require('node:crypto');
+            globalThis.crypto = webcrypto;
+        }
+
+        // Import Private Key (JWK)
+        const privateKeyJson = JSON.parse(event.organizerKeys.signing.private);
+        
+        // Note: usage for importing key
+        const privateKey = await crypto.subtle.importKey(
+            "jwk",
+            privateKeyJson,
+            {
+                name: "RSA-PSS",
+                hash: "SHA-384"
+            },
+            true,
+            ["sign"]
+        );
+
+        // Blind Sign the message
+        const blindedMsgUint8 = new Uint8Array(Buffer.from(blindedMessage, 'base64'));
+        const suite = RSABSSA.SHA384.PSS.Randomized();
+        const signature = await suite.blindSign(privateKey, blindedMsgUint8);
+
+        // Return the blinded signature (base64)
+        const signatureBase64 = Buffer.from(signature).toString('base64');
+        res.json({ signature: signatureBase64 });
 
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error("Signing Error:", err);
+        res.status(500).json({ msg: 'Server Error: ' + err.message });
     }
 });
 

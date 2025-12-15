@@ -36,6 +36,8 @@ const VotingPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [voteStatus, setVoteStatus] = useState(null); // 'pending', 'verified', 'rejected', or null
+  const [eligibilitySignature, setEligibilitySignature] = useState(null);
+  const [verifiedIdentityData, setVerifiedIdentityData] = useState(null);
 
   useEffect(() => {
     const fetchEventAndStatus = async () => {
@@ -87,8 +89,12 @@ const VotingPage = () => {
       return;
     }
 
-    // Open modal to get identity data
-    setShowIdentityModal(true);
+    if (eligibilitySignature) {
+      handleCastVoteTransaction();
+    } else {
+      // Open modal to get identity data
+      setShowIdentityModal(true);
+    }
   };
 
   const { mutateAsync: signAndExecuteTransaction } =
@@ -120,19 +126,75 @@ const VotingPage = () => {
         );
       }
 
-      // 2. Request Eligibility Signature from Backend
-      // We need to call the new endpoint explicitly
+      // 2. Blind Signature Flow
+      console.log("--- Starting Blind Signature Flow ---");
+      const { RSABSSA } = await import("@cloudflare/blindrsa-ts");
+      const suite = RSABSSA.SHA384.PSS.Randomized();
+
+      // Get Event's Public Signing Key
+      const organizerPubJwk = JSON.parse(event.organizerKeys.signing.public);
+      const publicDetails = await crypto.subtle.importKey(
+        "jwk",
+        organizerPubJwk,
+        { name: "RSA-PSS", hash: "SHA-384" },
+        true,
+        ["verify"]
+      );
+
+      // A. Prepare Message (Voter Address)
+      const message = new TextEncoder().encode(currentAccount.address);
+
+      // B. Blind
+      const { blindedMsg, inv } = await suite.blind(publicDetails, message);
+
+      // C. Request Signature from Backend (Organizer)
       const signResponse = await signEligibility({
         eventId: id,
-        voterAddress: currentAccount.address,
+        blindedMessage: naclUtil.encodeBase64(blindedMsg), // Encode to Base64
         identityData,
       });
-      const { signature } = signResponse;
+
+      const { signature: blindSignatureBase64 } = signResponse;
+      const blindSignature = naclUtil.decodeBase64(blindSignatureBase64);
+
+      // D. Unblind
+      const signature = await suite.finalize(
+        publicDetails,
+        message,
+        blindSignature,
+        inv
+      );
+
+      console.log("Unblinded Signature:", signature);
+
+      // Store Signature and Identity
+      setEligibilitySignature(signature);
+      setVerifiedIdentityData(identityData);
+
+      toast.success("Identity Verified! You can now cast your vote.");
+      setShowIdentityModal(false);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Verification failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCastVoteTransaction = async () => {
+    if (!eligibilitySignature || !verifiedIdentityData) {
+      toast.error(
+        "Missing verification signature. Please verify identity first."
+      );
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const packageId = import.meta.env.VITE_PACKAGE_ID;
+      const eaPublicKey = event.organizerKeys?.encryption?.public;
 
       // 3. Encrypt Vote
-      // candidateId is a number/string. Ensure we send what the contract expects.
-      // vote_test.js sent { candidate_id: 1 }.
-      // Our candidates have IDs like "1", "2".
       const voteContent = { candidate_id: Number(selectedCandidate) };
       const encryptedVote = encryptVote(voteContent, eaPublicKey);
 
@@ -140,7 +202,7 @@ const VotingPage = () => {
       console.log("--- constructing vote transaction ---");
       console.log("Event OnChainID:", event.onChainId);
       console.log("Encrypted Vote (len):", encryptedVote.length);
-      console.log("Signature (len):", naclUtil.decodeBase64(signature).length);
+      console.log("Signature (len):", eligibilitySignature.length);
 
       const tx = new Transaction();
       tx.moveCall({
@@ -148,7 +210,10 @@ const VotingPage = () => {
         arguments: [
           tx.object(event.onChainId),
           tx.pure.vector("u8", encryptedVote),
-          tx.pure.vector("u8", Array.from(naclUtil.decodeBase64(signature))),
+          tx.pure.vector(
+            "u8",
+            Array.from(new Uint8Array(eligibilitySignature))
+          ),
         ],
       });
 
@@ -158,26 +223,27 @@ const VotingPage = () => {
         transaction: tx,
       });
       console.log("Transaction Submitted! Digest:", result.digest);
-      console.log("Transaction Effects:", result);
 
       // 6. Record in Backend (Hybrid)
-      // If chain success, we record it in DB so UI updates nicely
       await castVote({
         eventId: id,
         candidateId: selectedCandidate,
-        identityData,
+        identityData: verifiedIdentityData,
         walletAddress: currentAccount.address,
       });
 
       toast.success(
         "Vote submitted securely to the Tangle! Waiting for verification."
       );
-      setShowIdentityModal(false);
+
+      // Clear sensitive data after successful vote
+      setEligibilitySignature(null);
+      setVerifiedIdentityData(null);
 
       // Update local state immediately
       setVoteStatus("pending");
 
-      // Refresh event data to show updated counts or status if needed
+      // Refresh event data
       const data = await getEventById(id);
       setEvent(data);
     } catch (error) {
@@ -194,7 +260,8 @@ const VotingPage = () => {
     if (voteStatus === "verified") return "Vote Verified";
     if (voteStatus === "rejected") return "Resubmit Vote";
     if (event?.status !== "ongoing") return "Voting Closed";
-    return "Submit Vote";
+    if (eligibilitySignature) return "Cast Vote";
+    return "verify Identity";
   };
 
   const isButtonDisabled = () => {
@@ -523,7 +590,7 @@ const VotingPage = () => {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={submitting}>
-                  {submitting ? "Submitting..." : "Confirm Vote"}
+                  {submitting ? "Verifying..." : "Verify Identity"}
                 </Button>
               </div>
             </form>
