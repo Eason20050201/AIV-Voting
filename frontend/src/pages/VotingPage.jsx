@@ -4,6 +4,7 @@ import {
   getEventById,
   castVote,
   getVoteStatus,
+  signEligibility,
 } from "../services/votingService";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
@@ -12,7 +13,12 @@ import "./VotingPage.css";
 
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { useCurrentAccount } from "@iota/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+} from "@iota/dapp-kit";
+import { Transaction } from "@iota/iota-sdk/transactions";
+import { encryptVote } from "../utils/crypto";
 
 const VotingPage = () => {
   const { id } = useParams();
@@ -84,17 +90,75 @@ const VotingPage = () => {
     setShowIdentityModal(true);
   };
 
+  const { mutateAsync: signAndExecuteTransaction } =
+    useSignAndExecuteTransaction();
+
   const handleIdentitySubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // 1. Get current config
+      const packageId = import.meta.env.VITE_PACKAGE_ID;
+      const eaPublicKey = import.meta.env.VITE_EA_PUBLIC_KEY_X25519;
+
+      if (!packageId || !eaPublicKey) {
+        throw new Error(
+          "Missing Voting Configuration (PackageID or Public Key)"
+        );
+      }
+
+      if (!event.onChainId) {
+        // Fallback or Error?
+        // For now, let's assume if it exists we use it, otherwise error or plain DB vote?
+        // Let's enforce it for this 'Encrypted Voting' demo.
+        // Note: If you want to support legacy events, you can add a check here.
+        throw new Error(
+          "This event is not configured for on-chain voting (Missing onChainId)."
+        );
+      }
+
+      // 2. Request Eligibility Signature from Backend
+      // We need to call the new endpoint explicitly
+      const signResponse = await signEligibility({
+        eventId: id,
+        voterAddress: currentAccount.address,
+        identityData,
+      });
+      const { signature } = signResponse;
+
+      // 3. Encrypt Vote
+      // candidateId is a number/string. Ensure we send what the contract expects.
+      // vote_test.js sent { candidate_id: 1 }.
+      // Our candidates have IDs like "1", "2".
+      const voteContent = { candidate_id: Number(selectedCandidate) };
+      const encryptedVote = encryptVote(voteContent, eaPublicKey);
+
+      // 4. Construct Transaction
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${packageId}::vote_event::vote`,
+        arguments: [
+          tx.object(event.onChainId),
+          tx.pure.vector("u8", encryptedVote),
+          tx.pure.vector("u8", Array.from(Buffer.from(signature, "base64"))),
+        ],
+      });
+
+      // 5. Submit to IOTA
+      await signAndExecuteTransaction({
+        transaction: tx,
+      });
+
+      // 6. Record in Backend (Hybrid)
+      // If chain success, we record it in DB so UI updates nicely
       await castVote({
         eventId: id,
         candidateId: selectedCandidate,
         identityData,
       });
+
       toast.success(
-        "Vote submitted successfully! Waiting for organizer verification."
+        "Vote submitted securely to the Tangle! Waiting for verification."
       );
       setShowIdentityModal(false);
 
@@ -105,7 +169,8 @@ const VotingPage = () => {
       const data = await getEventById(id);
       setEvent(data);
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(error.message || "Vote submission failed");
     } finally {
       setSubmitting(false);
     }

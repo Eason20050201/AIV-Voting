@@ -36,6 +36,10 @@ const eventSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  onChainId: {
+    type: String, // The IOTA Move Object ID
+    required: false // Optional for backward compatibility/hybrid
+  },
   startDate: {
     type: String, // Storing as YYYY-MM-DD string
     required: true

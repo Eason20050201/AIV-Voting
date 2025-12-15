@@ -100,3 +100,16 @@ export const getVoteStatus = async (eventId) => {
   if (!response.ok) throw new Error('Failed to fetch vote status');
   return response.json();
 };
+// New function for IOTA signing
+export const signEligibility = async (data) => {
+  const response = await fetch(`${API_BASE_URL}/votes/sign-eligibility`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+     const errorData = await response.json();
+     throw new Error(errorData.msg || 'Failed to sign eligibility');
+  }
+  return response.json();
+};

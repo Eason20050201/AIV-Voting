@@ -3,6 +3,15 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Vote = require('../model/Vote');
 const Event = require('../model/Event');
+const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
+
+// Load EA Keypair
+const EA_SECRET_KEY = process.env.EA_SECRET_KEY;
+if (!EA_SECRET_KEY) {
+    console.error('CRITICAL: EA_SECRET_KEY not found in environment variables.');
+}
+const eaKeypair = EA_SECRET_KEY ? Ed25519Keypair.fromSecretKey(EA_SECRET_KEY) : null;
+
 
 // @route   POST /api/votes
 // @desc    Cast a vote
@@ -174,4 +183,73 @@ router.get('/status/:eventId', auth, async (req, res) => {
   }
 });
 
+// @route   POST /api/votes/sign-eligibility
+// @desc    Check eligibility and return signature for IOTA transaction
+// @access  Private (Voter only)
+router.post('/sign-eligibility', auth, async (req, res) => {
+    try {
+        if (!eaKeypair) {
+            return res.status(500).json({ msg: 'Server configuration error: EA Key missing' });
+        }
+
+        const { eventId, voterAddress, identityData } = req.body;
+
+        if (!voterAddress) {
+            return res.status(400).json({ msg: 'Voter address is required' });
+        }
+
+        // 1. Authorization: Must be a voter
+        if (req.user.role !== 'voter') {
+            return res.status(403).json({ msg: 'Organizers cannot vote' });
+        }
+
+        // 2. Check Event Logic (Same as normal vote)
+        const event = await Event.findById(eventId);
+        if (!event) return res.status(404).json({ msg: 'Event not found' });
+        if (event.status !== 'ongoing') {
+            return res.status(400).json({ msg: 'Voting is not active' });
+        }
+
+        // 3. Check Duplicate ID
+        const duplicateIdContext = await Vote.findOne({
+            event: eventId,
+            'identityData.idNumber': identityData.idNumber,
+            status: { $ne: 'rejected' }
+        });
+        if (duplicateIdContext) {
+            return res.status(400).json({ msg: 'ID already used' });
+        }
+
+        // 4. Check Double Voting (Database Record)
+        // We still use MongoDB to track "attempts" or "status", although the real vote is on-chain.
+        // If we want to allow re-voting on rejection, we should check that here too.
+        const existingVote = await Vote.findOne({
+            event: eventId,
+            voter: req.user.id
+        });
+
+        if (existingVote) {
+             if (existingVote.status === 'rejected') {
+                 // Allow retry
+             } else {
+                 return res.status(400).json({ msg: 'You have already voted (or have a pending vote)' });
+             }
+        }
+
+        // 5. Sign the Address
+        // The signature S = Sign(voterAddress)
+        // We assume voterAddress is passed as a string (e.g. 0x...)
+        const msgBytes = new TextEncoder().encode(voterAddress);
+        const { signature } = await eaKeypair.signPersonalMessage(msgBytes);
+
+        // Return the signature (base64) to the frontend
+        res.json({ signature });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;
+
