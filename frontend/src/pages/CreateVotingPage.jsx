@@ -23,7 +23,8 @@ const CreateVotingPage = () => {
     useSignAndExecuteTransaction();
   const client = useIotaClient();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+
+  const initialFormState = {
     title: "",
     description: "",
     startDate: "",
@@ -32,7 +33,14 @@ const CreateVotingPage = () => {
       { id: Date.now(), name: "", description: "" },
       { id: Date.now() + 1, name: "", description: "" },
     ],
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  // Force reset on mount to prevent stale state from navigation history
+  useEffect(() => {
+    setFormData(initialFormState);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -281,7 +289,11 @@ const CreateVotingPage = () => {
       <div className="create-voting-content glass-panel">
         <h1 className="page-title">Create New Voting</h1>
 
-        <form onSubmit={handleSubmit} className="voting-form">
+        <form
+          onSubmit={handleSubmit}
+          className="voting-form"
+          autoComplete="off"
+        >
           <div className="form-group">
             <label htmlFor="title">Title</label>
             <input
