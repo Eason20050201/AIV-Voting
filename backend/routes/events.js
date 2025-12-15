@@ -166,6 +166,12 @@ router.patch('/:id/status', auth, async (req, res) => {
         }
 
         event.status = status;
+        
+        // Save results if provided (e.g. when ending the event)
+        if (req.body.tallyResults) {
+            event.tallyResults = req.body.tallyResults;
+        }
+
         await event.save();
         res.json(event);
     } catch (err) {

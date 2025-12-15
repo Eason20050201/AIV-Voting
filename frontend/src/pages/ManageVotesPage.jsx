@@ -86,16 +86,43 @@ const ManageVotesPage = () => {
   const handleEndEvent = async () => {
     if (
       !window.confirm(
-        "Are you sure you want to manually END this event? Voters will no longer be able to vote."
+        "Are you sure you want to END this event? This will trigger a final tally and publish the results."
       )
     )
       return;
+
     try {
-      await updateEventStatus(eventId, "ended");
-      setEvent({ ...event, status: "ended" });
-      toast.success("Event ended successfully.");
+      let finalResults = tallyResult;
+
+      // If we haven't scanned yet, or we want to ensure freshness, let's scan now.
+      // But maybe user already scanned.
+      // Let's force a scan to be safe and accurate.
+      setScanning(true);
+      toast.loading("Performing final tally...", { id: "end-scan" });
+
+      try {
+        const result = await tallyOnChainVotes(event, {
+          encryptionPrivateKey: event.organizerKeys.encryption.private,
+        });
+        finalResults = result;
+      } catch (e) {
+        console.error("Final tally failed", e);
+        toast.error("Final tally failed: " + e.message, { id: "end-scan" });
+        setScanning(false);
+        return; // Abort ending if tally fails? Or ask confirmation? Abort is safer.
+      }
+
+      // Now send status + results
+      await updateEventStatus(eventId, "ended", finalResults.tally);
+
+      setEvent({ ...event, status: "ended", tallyResults: finalResults.tally });
+      setTallyResult(finalResults);
+
+      toast.success("Event ended and results published!", { id: "end-scan" });
     } catch (err) {
-      toast.error("Failed to end event: " + err.message);
+      toast.error("Failed to end event: " + err.message, { id: "end-scan" });
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -170,8 +197,15 @@ const ManageVotesPage = () => {
               Scan the IOTA Tangle to count encrypted votes directly.
             </p>
           </div>
-          <Button onClick={handleOnChainTally} disabled={scanning}>
-            {scanning ? "Scanning..." : "Start On-Chain Scan"}
+          <Button
+            onClick={handleOnChainTally}
+            disabled={scanning || event.status === "ended"}
+          >
+            {scanning
+              ? "Scanning..."
+              : event.status === "ended"
+              ? "Event Ended"
+              : "Start On-Chain Scan"}
           </Button>
         </div>
 

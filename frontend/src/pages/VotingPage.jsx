@@ -259,6 +259,74 @@ const VotingPage = () => {
           </div>
         </header>
 
+        {/* Results Section (Only if ENDED) */}
+        {event.status === "ended" && (
+          <div
+            className="results-section glass-panel"
+            style={{ marginBottom: "2rem", border: "1px solid #4ade80" }}
+          >
+            <h2 style={{ color: "#4ade80", marginTop: 0 }}>
+              🏆 Official Results
+            </h2>
+            <div className="results-grid">
+              {event.candidates?.map((candidate) => {
+                // Use tallyResults if available (Official On-Chain), else fallback to DB count
+                const officialCount = event.tallyResults
+                  ? event.tallyResults[candidate.id]
+                  : candidate.voteCount;
+                return (
+                  <div
+                    key={candidate.id}
+                    className="result-card"
+                    style={{
+                      padding: "1rem",
+                      background: "rgba(255,255,255,0.05)",
+                      borderRadius: "8px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: "1.1rem" }}>
+                        {candidate.name}
+                      </h3>
+                      <p
+                        style={{ margin: 0, opacity: 0.7, fontSize: "0.9rem" }}
+                      >
+                        {candidate.description}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span
+                        style={{
+                          fontSize: "1.5rem",
+                          fontWeight: "bold",
+                          color: "#4ade80",
+                        }}
+                      >
+                        {officialCount || 0}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.8rem",
+                          display: "block",
+                          opacity: 0.7,
+                        }}
+                      >
+                        Votes
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Technical Details Section */}
+
         {/* Technical Details Section */}
         <div
           className="technical-details"
@@ -373,38 +441,43 @@ const VotingPage = () => {
           </div>
         </div>
 
-        <div className="candidates-section">
-          <h2>Cast Your Vote</h2>
+        {!voteStatus && event.status === "ongoing" && (
+          <div className="candidates-section">
+            <h2>Cast Your Vote</h2>
 
-          <div className="candidates-grid">
-            {event.candidates?.map((candidate) => (
-              <CandidateCard
-                key={candidate.id}
-                candidate={candidate}
-                isSelected={selectedCandidate === candidate.id}
-                onSelect={setSelectedCandidate}
-              />
-            ))}
+            <div className="candidates-grid">
+              {event.candidates?.map((candidate) => (
+                <CandidateCard
+                  key={candidate.id}
+                  candidate={candidate}
+                  isSelected={selectedCandidate === candidate.id}
+                  onSelect={setSelectedCandidate}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="voting-actions">
-          <Button
-            onClick={handleVoteClick}
-            disabled={isButtonDisabled()}
-            variant={
-              voteStatus === "verified"
-                ? "success"
-                : voteStatus === "pending"
-                ? "warning"
-                : voteStatus === "rejected"
-                ? "danger"
-                : "primary"
-            }
-          >
-            {getButtonText()}
-          </Button>
-        </div>
+        {/* Show Vote Status / Actions (Only if NOT ended or already voted) */}
+        {(event.status === "ongoing" || voteStatus) && (
+          <div className="voting-actions">
+            <Button
+              onClick={handleVoteClick}
+              disabled={isButtonDisabled()}
+              variant={
+                voteStatus === "verified"
+                  ? "success"
+                  : voteStatus === "pending"
+                  ? "warning"
+                  : voteStatus === "rejected"
+                  ? "danger"
+                  : "primary"
+              }
+            >
+              {getButtonText()}
+            </Button>
+          </div>
+        )}
       </div>
 
       {showIdentityModal && (

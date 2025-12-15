@@ -59,6 +59,11 @@ const eventSchema = new mongoose.Schema({
     required: true
   },
   candidates: [candidateSchema],
+  tallyResults: {
+    type: Map,
+    of: Number,
+    default: {}
+  },
   status: {
     type: String,
     enum: ['upcoming', 'ongoing', 'ended'],
