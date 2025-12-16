@@ -1,7 +1,7 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage";
+import WhitepaperPage from "./pages/WhitepaperPage";
 import GuidePage from "./pages/GuidePage";
 import VotingPage from "./pages/VotingPage";
 import LoginPage from "./pages/LoginPage";
@@ -55,7 +55,7 @@ function App() {
           <Routes>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="about" element={<AboutPage />} />
+              <Route path="whitepaper" element={<WhitepaperPage />} />
               <Route path="guide" element={<GuidePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="signup" element={<SignupPage />} />

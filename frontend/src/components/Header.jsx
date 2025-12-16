@@ -30,8 +30,8 @@ const Header = () => {
             Home
           </Link>
         )}
-        <Link to="/about" className="nav-link">
-          About
+        <Link to="/whitepaper" className="nav-link">
+          Whitepaper
         </Link>
         <Link to="/guide" className="nav-link">
           Guide

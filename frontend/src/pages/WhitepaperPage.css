@@ -1,0 +1,377 @@
+.whitepaper-container {
+    padding: 8rem 2rem 4rem;
+    max-width: 1200px;
+    /* Wider to fit Diagram */
+    margin: 0 auto;
+    min-height: 100vh;
+    color: var(--color-text-main);
+}
+
+.whitepaper-title {
+    text-align: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 4rem;
+    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.whitepaper-section {
+    margin-bottom: 6rem;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.whitepaper-section:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.whitepaper-section:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.section-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-indigo-400);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.abstract-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.abstract-text p {
+    text-indent: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Protocol Description --- */
+.protocol-description {
+    margin-top: 3rem;
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+}
+
+.protocol-desc-step {
+    margin-bottom: 2.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.protocol-desc-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-indigo-400);
+    margin-bottom: 1rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.protocol-role {
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+
+.protocol-block-math {
+    display: block;
+    margin: 0.5rem 0;
+    margin-left: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    color: #818cf8;
+}
+
+/* --- Protocol Diagram Container --- */
+.protocol-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 3rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    /* Handle small screens */
+}
+
+.protocol-header-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+.protocol-legend {
+    font-weight: bold;
+    color: var(--color-text-dim);
+}
+
+.participants-header {
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fbbf24;
+    /* Amber for actors */
+}
+
+/* The actual diagram grid */
+.protocol-step {
+    display: grid;
+    grid-template-columns: 200px 300px 1fr;
+    /* Phase Name | Math/Code | Visual Area */
+    gap: 1rem;
+    min-height: 120px;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.step-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-indigo-300);
+}
+
+/* Math Font Style */
+.protocol-math,
+.step-math {
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    background: transparent;
+    padding: 0 0.3rem;
+    border-radius: 4px;
+    color: #e2e8f0;
+    font-size: 1.1em;
+    letter-spacing: 0.05em;
+}
+
+.protocol-block-math {
+    display: block;
+    margin: 0.5rem 0;
+    margin-left: 1rem;
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    font-size: 1.1em;
+    color: #818cf8;
+}
+
+.step-visual {
+    position: relative;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    /* Voter -- Blockchain -- EA */
+    padding: 0 5%;
+}
+
+/* Vertical Life Lines */
+.lifeline {
+    position: absolute;
+    top: -2rem;
+    /* Connect from previous step */
+    bottom: -2rem;
+    /* Connect to next step */
+    width: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+}
+
+.lifeline.voter {
+    left: 15%;
+}
+
+.lifeline.blockchain {
+    left: 50%;
+}
+
+.lifeline.ea {
+    left: 85%;
+}
+
+/* Actor Heads (Only for top row really, but we can put markers) */
+.actor-marker {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.actor-marker.voter {
+    left: 15%;
+    margin-left: -6px;
+}
+
+.actor-marker.blockchain {
+    left: 50%;
+    margin-left: -6px;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.actor-marker.ea {
+    left: 85%;
+    margin-left: -6px;
+    background: #f59e0b;
+    box-shadow: 0 0 10px #f59e0b;
+}
+
+/* Arrows */
+.arrow-container {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    /* Animated */
+    z-index: 1;
+}
+
+/* Arrow Directions */
+.arrow-right {
+    left: 15%;
+    /* Start from Voter */
+    width: 70%;
+    /* Voter to EA (15% to 85% = 70% width) */
+}
+
+.arrow-left {
+    right: 15%;
+    width: 70%;
+    flex-direction: row-reverse;
+    /* Flip text/arrowhead */
+}
+
+.arrow-short-right {
+    left: 15%;
+    width: 35%;
+    /* Voter to Blockchain (15% to 50% = 35%) */
+}
+
+.arrow-short-left-bc-voter {
+    left: 15%;
+    width: 35%;
+    flex-direction: row-reverse;
+}
+
+.arrow-short-right-bc-ea {
+    left: 50%;
+    width: 35%;
+    /* Blockchain to EA */
+}
+
+.arrow-short-left-ea-bc {
+    left: 50%;
+    width: 35%;
+    flex-direction: row-reverse;
+}
+
+/* SVG Arrow Line */
+.arrow-line {
+    height: 2px;
+    flex-grow: 1;
+    background: var(--color-text-main);
+    position: relative;
+}
+
+.arrow-head {
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 8px solid var(--color-text-main);
+    /* Right pointing arrow default */
+}
+
+/* Flip arrow head for left direction is handled by flex-direction row-reverse mostly, but might need manual check */
+.arrow-label {
+    position: absolute;
+    top: -20px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #fbbf24;
+    white-space: nowrap;
+}
+
+/* Security Analysis Cards */
+.security-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.security-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.security-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.security-card h3 {
+    color: var(--color-indigo-400);
+    margin-top: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.security-card p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .protocol-step {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .protocol-header-row {
+        display: none;
+        /* Hide complex header on mobile, use simple stacked */
+    }
+
+    .step-visual {
+        height: 100px;
+    }
+}
