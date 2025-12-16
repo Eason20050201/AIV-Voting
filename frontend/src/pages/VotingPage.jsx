@@ -126,6 +126,15 @@ const VotingPage = () => {
     fetchEventAndStatus();
   }, [id, user, currentAccount]);
 
+  const handleCandidateSelect = (candidateId) => {
+    // Prevent selection if not verified
+    if (verificationStatus !== "verified") {
+      toast.error("Please verify before voting.");
+      return;
+    }
+    setSelectedCandidate(candidateId);
+  };
+
   const handleVoteClick = () => {
     if (!user) {
       toast.error("Please login to vote");
@@ -579,7 +588,7 @@ const VotingPage = () => {
                   key={candidate.id}
                   candidate={candidate}
                   isSelected={selectedCandidate === candidate.id}
-                  onSelect={setSelectedCandidate}
+                  onSelect={handleCandidateSelect}
                 />
               ))}
             </div>
@@ -596,10 +605,10 @@ const VotingPage = () => {
                 voteStatus === "verified"
                   ? "success"
                   : voteStatus === "pending"
-                  ? "warning"
-                  : voteStatus === "rejected"
-                  ? "danger"
-                  : "primary"
+                    ? "warning"
+                    : voteStatus === "rejected"
+                      ? "danger"
+                      : "primary"
               }
             >
               {getButtonText()}
