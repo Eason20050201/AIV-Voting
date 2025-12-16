@@ -399,11 +399,11 @@ const VotingPage = () => {
         {/* Results Section (Only if ENDED) */}
         {event.status === "ended" && (
           <div
-            className="results-section glass-panel"
-            style={{ marginBottom: "2rem", border: "1px solid #4ade80" }}
+            className="results-section"
+            style={{ marginBottom: "2rem" }}
           >
             <h2 style={{ color: "#4ade80", marginTop: 0 }}>
-              🏆 Official Results
+              Official Results
             </h2>
             <div className="results-grid">
               {event.candidates?.map((candidate) => {
