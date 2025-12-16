@@ -1,0 +1,248 @@
+.guide-page-container {
+  padding: 8rem 2rem 4rem;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.guide-content {
+  position: relative;
+  /* Remove the main big box background to allow floating sections */
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  backdrop-filter: none;
+}
+
+.guide-title {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 4rem;
+  font-weight: 800;
+  /* Gradient Text */
+  background: linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.05em;
+  text-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+
+  /* Entrance Animation */
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Timeline Container */
+.guide-timeline {
+  position: relative;
+  /* Increase padding to give enough space for the timeline elements */
+  padding-left: 46px;
+}
+
+/* The vertical line */
+.guide-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  /* Center of the line: 24px (roughly half of 50px) */
+  left: 24px;
+  height: 100%;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color), transparent);
+  opacity: 0.3;
+}
+
+.guide-section {
+  position: relative;
+  margin-bottom: 4rem;
+
+  /* Entrance Animation with Stagger */
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Stagger delays manually */
+.guide-section:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.guide-section:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.guide-section:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.guide-section:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+.guide-section:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+/* Section Header (The Number Circle + Title) */
+.section-header {
+  display: flex;
+  align-items: center;
+  /* Reduced gap to bring title closer */
+  gap: 1rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.section-number {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  z-index: 2;
+  /* Sit above the line */
+  border: 4px solid var(--color-bg);
+
+  /* Absolute positioning for perfect alignment on the line */
+  position: absolute;
+  /* Left position relative to usage: padding-left of timeline is 50px */
+  /* We are inside section-header which is inside timeline.
+     So left: 0 of section-header = +50px from timeline edge.
+     We want center at 24px + 1px (line center is 24px + 1px due to 2px width? let's say 25px).
+     Number center needs to be at 25px.
+     Number left edge = 25px - 18px = 7px.
+     So relative to section-header (at 50px): 7px - 50px = -43px.
+  */
+  left: -43px;
+}
+
+.section-title {
+  display: inline-block;
+  /* Ensure gradient works properly */
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+
+  /* Subtle Gradient Effect */
+  background: linear-gradient(to right, #f8fafc 20%, #818cf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  /* Ensure it doesn't overlap the number if pushed */
+  padding-left: 0.5rem;
+}
+
+/* Steps Cards */
+.step-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.step-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--color-indigo-400);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* Image Styling */
+.image-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.5s ease;
+}
+
+.guide-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.step-card:hover .image-wrapper {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/*
+.step-card:hover .guide-image {
+  transform: scale(1.02);
+}
+*/
+
+.guide-text {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .guide-page-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .guide-timeline {
+    padding-left: 1.5rem;
+  }
+
+  .guide-timeline::before {
+    left: 2px;
+  }
+
+  .section-number {
+    width: 28px;
+    height: 28px;
+    margin-left: -2.3rem;
+    font-size: 0.9rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .step-card {
+    padding: 1.5rem;
+  }
+
+  .guide-title {
+    font-size: 2.2rem;
+  }
+}

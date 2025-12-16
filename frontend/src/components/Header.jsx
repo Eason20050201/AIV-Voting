@@ -33,6 +33,9 @@ const Header = () => {
         <Link to="/about" className="nav-link">
           About
         </Link>
+        <Link to="/guide" className="nav-link">
+          Guide
+        </Link>
         {user && user.role === "organizer" && (
           <Link to="/create" className="nav-link create-btn">
             Create Voting
