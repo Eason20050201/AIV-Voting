@@ -1,6 +1,7 @@
 import React from "react";
 import "./WhitepaperPage.css";
 import ProtocolDiagram from "../components/ProtocolDiagram";
+import iotaLogoHorizontal from "../assets/Iota_logo.png";
 
 const WhitepaperPage = () => {
     return (
@@ -126,6 +127,23 @@ const WhitepaperPage = () => {
                         </p>
                     </div>
                 </div>
+            </section>
+
+            {/* Sponsorship */}
+            <section className="sponsorship-section">
+                <p>Special thanks to the IOTA Foundation for their support.</p>
+                <a
+                    href="https://www.iota.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="iota-logo-container"
+                >
+                    <img
+                        src={iotaLogoHorizontal}
+                        alt="IOTA Foundation Logo"
+                        className="iota-logo"
+                    />
+                </a>
             </section>
         </div>
     );

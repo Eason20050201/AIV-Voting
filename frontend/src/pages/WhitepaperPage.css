@@ -375,3 +375,43 @@
         height: 100px;
     }
 }
+
+/* --- Sponsorship Section --- */
+.sponsorship-section {
+    text-align: center;
+    margin-top: 8rem;
+    padding-top: 4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.6s;
+}
+
+.sponsorship-section p {
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+}
+
+.iota-logo-container {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    transition: opacity 0.3s ease;
+}
+
+.iota-logo-container:hover {
+    opacity: 0.8;
+}
+
+.iota-logo {
+    max-width: 180px;
+    height: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.iota-logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
