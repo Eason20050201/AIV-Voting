@@ -519,6 +519,24 @@ const VotingPage = () => {
               </div>
             )}
 
+            {event.status === "ended" && event.organizerKeys?.encryption?.private && (
+              <div style={{ marginTop: "0.5rem" }}>
+                <span style={{ color: "#ef4444" }}>
+                  Decryption Key (X25519 Secret):
+                </span>
+                <div
+                  style={{
+                    wordBreak: "break-all",
+                    color: "#fca5a5",
+                    marginTop: "0.25rem",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {event.organizerKeys.encryption.private}
+                </div>
+              </div>
+            )}
+
             {event.organizerKeys?.signing && (
               <div style={{ marginTop: "0.5rem" }}>
                 <span style={{ color: "#64748b" }}>
