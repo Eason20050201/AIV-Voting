@@ -53,7 +53,8 @@
   padding: 0;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: var(--color-indigo-400);
 }
 
@@ -88,5 +89,6 @@
 }
 
 .logout-btn:hover {
-  color: #ef4444; /* Red color for logout */
+  color: #ef4444;
+  /* Red color for logout */
 }

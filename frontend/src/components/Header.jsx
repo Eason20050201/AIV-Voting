@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import logo from "../assets/LOGO-name.svg";
 import { useAuth } from "../context/AuthContext";
 import UserMenu from "./UserMenu";
@@ -22,24 +22,49 @@ const Header = () => {
 
       <nav className="nav">
         {user && user.role === "organizer" ? (
-          <Link to="/my-created" className="nav-link">
+          <NavLink
+            to="/my-created"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
             My created Votings
-          </Link>
+          </NavLink>
         ) : (
-          <Link to="/" className="nav-link">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
             Home
-          </Link>
+          </NavLink>
         )}
-        <Link to="/whitepaper" className="nav-link">
+        <NavLink
+          to="/whitepaper"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
           Whitepaper
-        </Link>
-        <Link to="/guide" className="nav-link">
+        </NavLink>
+        <NavLink
+          to="/guide"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
           Guide
-        </Link>
+        </NavLink>
         {user && user.role === "organizer" && (
-          <Link to="/create" className="nav-link create-btn">
+          <NavLink
+            to="/create"
+            className={({ isActive }) =>
+              isActive ? "nav-link create-btn active" : "nav-link create-btn"
+            }
+          >
             Create Voting
-          </Link>
+          </NavLink>
         )}
 
         {user ? (
